@@ -1,0 +1,125 @@
+﻿<Window x:Class="AMRCStoryTags.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AMRCStoryTags"
+        mc:Ignorable="d"
+        Title="SharpCloud Enterprise story tag builder v" Height="450" Width="800">
+    <Grid>
+        <TabControl x:Name="tab" Margin="10">
+            
+            <TabItem Header="Settings" >
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="SiteURL:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <TextBox x:Name="url" Width="240" />
+                        <Grid Margin="10,0" ToolTip="The site where you connect to SharpCloud">
+                            <Ellipse Width="20" Height="20" Fill="Blue" />
+                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
+                        </Grid>
+                        <Button Content=" EU " Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com"/>
+                        <Button Content=" UK " Click="Button_Click_1" ToolTip="https://uk.sharpcloud.com" />
+                        <Button Content=" US " Click="Button_Click_2" ToolTip="https://my.sharpcloud.com"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="UserName:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <TextBox x:Name="username" Width="240" />
+                        <Grid Margin="10,0" ToolTip="Your SharpCloud username">
+                            <Ellipse Width="20" Height="20" Fill="Blue" />
+                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Password:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <PasswordBox x:Name="password" Width="240" />
+                        <Grid Margin="10,0">
+                            <Grid.ToolTip>
+                                <TextBlock>
+                                    Your SharpCloud password.
+                                    <LineBreak />
+                                    Note that is your are using O365/SAML you will need to know your actual SharpCloud password.
+                                </TextBlock>
+                            </Grid.ToolTip>
+                            <Ellipse Width="20" Height="20" Fill="Blue" />
+                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
+                        </Grid>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Team/Directory ID:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <TextBox x:Name="team" Width="240" />
+                        <Grid Margin="10,0" >
+                            <Grid.ToolTip>
+                                <TextBlock>
+                                    The identify of your team or directory where all your stories exist.
+                                    <LineBreak />
+                                    Be sure you tick the checkbox if using a directory instead of a team.
+                                </TextBlock>
+                            </Grid.ToolTip>
+
+                            <Ellipse Width="20" Height="20" Fill="Blue" />
+                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
+                        </Grid>
+                        <CheckBox x:Name="cbDirectory"  Content="Directory" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="TemplateID:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <TextBox x:Name="template" Width="240" />
+                        <Grid Margin="10,0">
+                            <Grid.ToolTip>
+                                <TextBlock>
+                                    The id of the enterprise template story where the tags will be created. 
+                                    <LineBreak />
+                                    The tags reflect the names of the stories in the enterprise solution and are created in a tag group called 'UsedInStories'
+                                </TextBlock>
+                            </Grid.ToolTip>
+                            <Ellipse Width="20" Height="20" Fill="Blue" />
+                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
+                        </Grid>
+                    </StackPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Process" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100" />
+                        <RowDefinition  />
+                    </Grid.RowDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <Button Content="Do it" Height="40" Width="200" Click="Button_Click" x:Name="button"/>
+                        <StackPanel Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <CheckBox Content="Remove old tags" HorizontalAlignment="Center" x:Name="chkRemoveOldtags" VerticalAlignment="Center"/>
+                            <Grid Margin="10,0">
+                                <Grid.ToolTip>
+                                    <TextBlock>
+                                    Ticking this will clear the tag assignments only. The tag definitions (in the template story) will not be deleted.
+                                    <LineBreak />
+                                    Use this option if you have removed shared items from one or more stories, or if you are not entirely sure if items could have been removed.
+                                    <LineBreak />
+                                    Note that this option takes slightly longer to run.
+                                    </TextBlock>
+                                </Grid.ToolTip>
+                                <Ellipse Width="20" Height="20" Fill="Blue" />
+                                <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
+                            </Grid>
+
+                        </StackPanel>
+                    </StackPanel>
+                    <TextBox x:Name="Status" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Grid.Row="1" Margin="10" FontSize="12" Foreground="CadetBlue" Background="#333333" FontFamily="Courier New" Text="" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="About" >
+                <Grid>
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Margin="100,10" FontSize="15" TextWrapping="Wrap" Text="This widget searches across an Enterprise Solution and tags each item with the names of the stories in which it is being used. This means you can count how often an item is used within the solution. The widget allows you to specify a target team or directory, so you can limit the search (and hence the tagging and count) to only the subset of stories you want to include" />
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="20">
+                        <TextBlock Text="Code available on GitHub/SharpCloud" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Created by SharpCloud" HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

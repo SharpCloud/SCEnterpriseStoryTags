@@ -3,82 +3,90 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:AMRCStoryTags"
         mc:Ignorable="d"
-        Title="SharpCloud Enterprise story tag builder v" Height="450" Width="800">
-    <Grid>
-        <TabControl x:Name="tab" Margin="10">
-            
-            <TabItem Header="Settings" >
+        Background="{StaticResource AppBackground}"
+        FontSize="{StaticResource DefaultFontSize}"
+        Height="450"
+        Title="SharpCloud Enterprise story tag builder v"
+        UseLayoutRounding="True"
+        Width="800">
+    <Grid Background="Black">
+        <TabControl x:Name="tab">
+            <!-- Settings Tab -->
+            <TabItem Header="Settings">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel.Resources>
+                        <Style TargetType="TextBox">
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                        </Style>
+                    </StackPanel.Resources>
+
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="SiteURL:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <Label Content="SiteURL:" />
                         <TextBox x:Name="url" Width="240" />
-                        <Grid Margin="10,0" ToolTip="The site where you connect to SharpCloud">
-                            <Ellipse Width="20" Height="20" Fill="Blue" />
-                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
-                        </Grid>
+                        <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
                         <Button Content=" EU " Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com"/>
                         <Button Content=" UK " Click="Button_Click_1" ToolTip="https://uk.sharpcloud.com" />
                         <Button Content=" US " Click="Button_Click_2" ToolTip="https://my.sharpcloud.com"/>
                     </StackPanel>
+                    
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="UserName:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <Label Content="UserName:" />
                         <TextBox x:Name="username" Width="240" />
-                        <Grid Margin="10,0" ToolTip="Your SharpCloud username">
-                            <Ellipse Width="20" Height="20" Fill="Blue" />
-                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
-                        </Grid>
+                        <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="Your SharpCloud username" />
                     </StackPanel>
+                    
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Password:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <Label Content="Password:" />
                         <PasswordBox x:Name="password" Width="240" />
-                        <Grid Margin="10,0">
-                            <Grid.ToolTip>
+                        <Image Height="20" Margin="10,0" Source="Images/Information.png">
+                            <Image.ToolTip>
                                 <TextBlock>
                                     Your SharpCloud password.
                                     <LineBreak />
                                     Note that is your are using O365/SAML you will need to know your actual SharpCloud password.
                                 </TextBlock>
-                            </Grid.ToolTip>
-                            <Ellipse Width="20" Height="20" Fill="Blue" />
-                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
-                        </Grid>
+                            </Image.ToolTip>
+                        </Image>
                     </StackPanel>
+                    
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="Team/Directory ID:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <Label Content="Team/Directory ID:" />
                         <TextBox x:Name="team" Width="240" />
-                        <Grid Margin="10,0" >
-                            <Grid.ToolTip>
+                        <Image Height="20" Margin="10,0" Source="Images/Information.png">
+                            <Image.ToolTip>
                                 <TextBlock>
                                     The identify of your team or directory where all your stories exist.
                                     <LineBreak />
                                     Be sure you tick the checkbox if using a directory instead of a team.
                                 </TextBlock>
-                            </Grid.ToolTip>
-
-                            <Ellipse Width="20" Height="20" Fill="Blue" />
-                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
-                        </Grid>
-                        <CheckBox x:Name="cbDirectory"  Content="Directory" VerticalAlignment="Center"/>
+                            </Image.ToolTip>
+                        </Image>
+                        <CheckBox x:Name="cbDirectory"
+                                  Foreground="{StaticResource TextBlue}"
+                                  VerticalAlignment="Center"
+                                  VerticalContentAlignment="Center">
+                            Directory
+                        </CheckBox>
                     </StackPanel>
+                    
                     <StackPanel Orientation="Horizontal">
-                        <Label Content="TemplateID:"  Width="110" HorizontalContentAlignment="Right"/>
+                        <Label Content="Template ID:" />
                         <TextBox x:Name="template" Width="240" />
-                        <Grid Margin="10,0">
-                            <Grid.ToolTip>
+                        <Image Height="20" Margin="10,0" Source="Images/Information.png">
+                            <Image.ToolTip>
                                 <TextBlock>
                                     The id of the enterprise template story where the tags will be created. 
                                     <LineBreak />
                                     The tags reflect the names of the stories in the enterprise solution and are created in a tag group called 'UsedInStories'
                                 </TextBlock>
-                            </Grid.ToolTip>
-                            <Ellipse Width="20" Height="20" Fill="Blue" />
-                            <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
-                        </Grid>
+                            </Image.ToolTip>
+                        </Image>
                     </StackPanel>
                 </StackPanel>
             </TabItem>
+
+            <!-- Process Tab -->
             <TabItem Header="Process" >
                 <Grid>
                     <Grid.RowDefinitions>
@@ -89,25 +97,24 @@
                         <Button Content="Do it" Height="40" Width="200" Click="Button_Click" x:Name="button"/>
                         <StackPanel Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
                             <CheckBox Content="Remove old tags" HorizontalAlignment="Center" x:Name="chkRemoveOldtags" VerticalAlignment="Center"/>
-                            <Grid Margin="10,0">
-                                <Grid.ToolTip>
+                            <Image Height="20" Margin="10,0" Source="Images/Information.png">
+                                <Image.ToolTip>
                                     <TextBlock>
-                                    Ticking this will clear the tag assignments only. The tag definitions (in the template story) will not be deleted.
-                                    <LineBreak />
-                                    Use this option if you have removed shared items from one or more stories, or if you are not entirely sure if items could have been removed.
-                                    <LineBreak />
-                                    Note that this option takes slightly longer to run.
+                                        Ticking this will clear the tag assignments only. The tag definitions (in the template story) will not be deleted.
+                                        <LineBreak />
+                                        Use this option if you have removed shared items from one or more stories, or if you are not entirely sure if items could have been removed.
+                                        <LineBreak />
+                                        Note that this option takes slightly longer to run.
                                     </TextBlock>
-                                </Grid.ToolTip>
-                                <Ellipse Width="20" Height="20" Fill="Blue" />
-                                <TextBlock Text="i" Foreground="White" Width="20" FontWeight="Bold"  TextAlignment="Center" VerticalAlignment="Center" FontSize="18" FontFamily="Courier New"/>
-                            </Grid>
-
+                                </Image.ToolTip>
+                            </Image>
                         </StackPanel>
                     </StackPanel>
                     <TextBox x:Name="Status" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Grid.Row="1" Margin="10" FontSize="12" Foreground="CadetBlue" Background="#333333" FontFamily="Courier New" Text="" />
                 </Grid>
             </TabItem>
+
+            <!-- About Tab -->
             <TabItem Header="About" >
                 <Grid>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">

@@ -1,0 +1,41 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:SCEnterpriseStoryTags.Dictionaries">
+    <Style TargetType="TabControl">
+        <Setter Property="IsTabStop" Value="False"/>
+        <Setter Property="Background" Value="{StaticResource AppBackground}"/>
+        <Setter Property="BorderBrush" Value="#404040"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+    <Style TargetType="TabItem">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TabItem">
+                    <Grid x:Name="gdBorder" Background="{StaticResource AppBackground}">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Name="Border" BorderThickness="1,1,1,0" CornerRadius="0" Margin="2,0" Height="30">
+                                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                  ContentSource="Header" Margin="10,2"/>
+                            </Border>
+                        </StackPanel>
+                        <Border x:Name="selectedBorder" Height="2" VerticalAlignment="Bottom" Background="{StaticResource AppBlue}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="selectedBorder" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="gdBorder" Property="Background" Value="{StaticResource AppBackground}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="False">
+                            <Setter TargetName="selectedBorder" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="gdBorder" Property="Background" Value="#111111" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

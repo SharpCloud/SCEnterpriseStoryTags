@@ -9,11 +9,13 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <SolidColorBrush x:Key="AppBackground" Color="#303030" />
-                    <SolidColorBrush x:Key="AppBlue" Color="#1360C5" />
+                    <SolidColorBrush x:Key="ButtonBlue" Color="#1360C5" />
+                    <SolidColorBrush x:Key="ButtonGrey" Color="#515151" />
                     <SolidColorBrush x:Key="TextBlue" Color="#00AFFC" />
                     <system:Double x:Key="DefaultFontSize">14</system:Double>
                 </ResourceDictionary>
 
+                <ResourceDictionary Source="Dictionaries/Button.xaml"/>
                 <ResourceDictionary Source="Dictionaries/Label.xaml"/>
                 <ResourceDictionary Source="Dictionaries/TabControl.xaml"/>
             </ResourceDictionary.MergedDictionaries>

@@ -27,12 +27,31 @@
                     </StackPanel.Resources>
 
                     <StackPanel Orientation="Horizontal">
+                        <StackPanel.Resources>
+                            <Style BasedOn="{StaticResource DefaultButtonStyle}" TargetType="Button">
+                                <Setter Property="Background" Value="{StaticResource ButtonGrey}" />
+                                <Setter Property="Height" Value="34" />
+                                <Setter Property="Width" Value="48" />
+                            </Style>
+
+                            <Style x:Key="Flag" TargetType="Image">
+                                <Setter Property="Height" Value="26" />
+                                <Setter Property="Width" Value="40" />
+                            </Style>
+                        </StackPanel.Resources>
+
                         <Label Content="SiteURL:" />
                         <TextBox x:Name="url" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
-                        <Button Content=" EU " Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com"/>
-                        <Button Content=" UK " Click="Button_Click_1" ToolTip="https://uk.sharpcloud.com" />
-                        <Button Content=" US " Click="Button_Click_2" ToolTip="https://my.sharpcloud.com"/>
+                        <Button Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com">
+                            <Image Source="Images/Flags/EU_40x26.png" Style="{StaticResource Flag}" />
+                        </Button>
+                        <Button Click="Button_Click_1" ToolTip="https://uk.sharpcloud.com">
+                            <Image Source="Images/Flags/UK_40x26.png" Style="{StaticResource Flag}" />
+                        </Button>
+                        <Button Click="Button_Click_2" ToolTip="https://my.sharpcloud.com">
+                            <Image Source="Images/Flags/US_40x26.png" Style="{StaticResource Flag}" />
+                        </Button>
                     </StackPanel>
                     
                     <StackPanel Orientation="Horizontal">

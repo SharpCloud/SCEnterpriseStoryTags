@@ -22,7 +22,7 @@
                                                   ContentSource="Header" Margin="10,2"/>
                             </Border>
                         </StackPanel>
-                        <Border x:Name="selectedBorder" Height="2" VerticalAlignment="Bottom" Background="{StaticResource AppBlue}" />
+                        <Border x:Name="selectedBorder" Height="2" VerticalAlignment="Bottom" Background="{StaticResource ButtonBlue}" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">

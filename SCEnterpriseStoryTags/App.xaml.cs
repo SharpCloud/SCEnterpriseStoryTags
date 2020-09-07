@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace AMRCStoryTags
+namespace SCEnterpriseStoryTags
 {
     /// <summary>
     /// Interaction logic for App.xaml

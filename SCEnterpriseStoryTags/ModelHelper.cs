@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Win32;
+using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Xml;
-using Microsoft.Win32;
 
-namespace AMRCStoryTags
+namespace SCEnterpriseStoryTags
 {
     public class ModelHelper
     {

@@ -11,7 +11,7 @@ using System.Windows;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SCEnterpriseStoryTags")]
+[assembly: AssemblyProduct("SharpCloud Enterprise Story Tag Builder")]
 [assembly: AssemblyCopyright("Copyright © SharpCloud 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

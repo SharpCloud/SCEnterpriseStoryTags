@@ -3,15 +3,18 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:SCEnterpriseStoryTags.ViewModels"
         mc:Ignorable="d"
         Background="{StaticResource AppBackground}"
+        DataContext="{Binding MainViewModel, Source={StaticResource ViewModelLocator}}"
         FontSize="{StaticResource DefaultFontSize}"
         Height="450"
-        Title="SharpCloud Enterprise Story Tag Builder v"
+        Title="{Binding AppName}"
         UseLayoutRounding="True"
         Width="800">
+
     <Grid Background="Black">
-        <TabControl x:Name="tab">
+        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
             <!-- Settings Tab -->
             <TabItem Header="Settings">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -41,7 +44,7 @@
                         </StackPanel.Resources>
 
                         <Label Content="SiteURL:" />
-                        <TextBox x:Name="url" />
+                        <TextBox x:Name="Url" Text="{Binding Url}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
                         <Button Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com">
                             <Image Source="Images/Flags/EU_40x26.png" Style="{StaticResource Flag}" />
@@ -56,13 +59,13 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="UserName:" />
-                        <TextBox x:Name="username" />
+                        <TextBox x:Name="Username" Text="{Binding Username}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="Your SharpCloud username" />
                     </StackPanel>
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Password:" />
-                        <PasswordBox x:Name="password" />
+                        <PasswordBox x:Name="Password" PasswordChanged="PasswordChanged" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>
@@ -76,7 +79,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Team/Directory ID:" />
-                        <TextBox x:Name="team" />
+                        <TextBox x:Name="Team" Text="{Binding Team}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>
@@ -86,8 +89,8 @@
                                 </TextBlock>
                             </Image.ToolTip>
                         </Image>
-                        <CheckBox x:Name="cbDirectory"
-                                  Foreground="{StaticResource TextBlue}"
+                        <CheckBox Foreground="{StaticResource TextBlue}"
+                                  IsChecked="{Binding IsDirectory, Mode=TwoWay}"
                                   VerticalAlignment="Center"
                                   VerticalContentAlignment="Center">
                             Directory
@@ -96,7 +99,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Template ID:" />
-                        <TextBox x:Name="template" />
+                        <TextBox x:Name="Template" Text="{Binding Template}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>
@@ -118,11 +121,11 @@
                         <RowDefinition  />
                     </Grid.RowDefinitions>
                     <StackPanel VerticalAlignment="Center">
-                        <Button Content="Do it" Height="40" Width="200" Click="Button_Click" x:Name="button"/>
+                        <Button Content="Do it" Height="40" Width="200" Click="Button_Click" IsEnabled="{Binding IsIdle}" />
                         <StackPanel Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <CheckBox x:Name="chkRemoveOldtags"
-                                      Foreground="{StaticResource TextBlue}"
+                            <CheckBox Foreground="{StaticResource TextBlue}"
                                       HorizontalAlignment="Center"
+                                      IsChecked="{Binding RemoveOldTags, Mode=TwoWay}"
                                       VerticalAlignment="Center"
                                       VerticalContentAlignment="Center">
                                 Remove old tags
@@ -140,7 +143,16 @@
                             </Image>
                         </StackPanel>
                     </StackPanel>
-                    <TextBox x:Name="Status" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Grid.Row="1" Margin="10" FontSize="12" Foreground="CadetBlue" Background="#333333" FontFamily="Courier New" Text="" />
+                    <TextBox Background="{StaticResource AppBackground}"
+                             FontFamily="Courier New"
+                             FontSize="12"
+                             Foreground="{StaticResource TextBlue}"
+                             Grid.Row="1"
+                             IsReadOnly="True"
+                             Margin="10"
+                             Text="{Binding Status}"
+                             VerticalScrollBarVisibility="Visible">
+                    </TextBox>
                 </Grid>
             </TabItem>
 
@@ -158,7 +170,7 @@
                         </TextBlock>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="Created by " HorizontalAlignment="Center"/>
+                            <TextBlock Text="Created by " VerticalAlignment="Center"/>
                             <Image Height="20" Source="Images/SharpCloud_123x20.png" />
                         </StackPanel>
                     </StackPanel>

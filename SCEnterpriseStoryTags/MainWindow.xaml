@@ -16,14 +16,19 @@
             <TabItem Header="Settings">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <StackPanel.Resources>
-                        <Style TargetType="TextBox">
+                        <Style x:Key="DataEntry" TargetType="Control">
+                            <Setter Property="Height" Value="34" />
                             <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="Width" Value="240" />
                         </Style>
+
+                        <Style BasedOn="{StaticResource DataEntry}" TargetType="PasswordBox" />
+                        <Style BasedOn="{StaticResource DataEntry}" TargetType="TextBox" />
                     </StackPanel.Resources>
 
                     <StackPanel Orientation="Horizontal">
                         <Label Content="SiteURL:" />
-                        <TextBox x:Name="url" Width="240" />
+                        <TextBox x:Name="url" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
                         <Button Content=" EU " Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com"/>
                         <Button Content=" UK " Click="Button_Click_1" ToolTip="https://uk.sharpcloud.com" />
@@ -32,13 +37,13 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="UserName:" />
-                        <TextBox x:Name="username" Width="240" />
+                        <TextBox x:Name="username" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="Your SharpCloud username" />
                     </StackPanel>
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Password:" />
-                        <PasswordBox x:Name="password" Width="240" />
+                        <PasswordBox x:Name="password" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>
@@ -52,7 +57,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Team/Directory ID:" />
-                        <TextBox x:Name="team" Width="240" />
+                        <TextBox x:Name="team" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>
@@ -72,7 +77,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Template ID:" />
-                        <TextBox x:Name="template" Width="240" />
+                        <TextBox x:Name="template" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>

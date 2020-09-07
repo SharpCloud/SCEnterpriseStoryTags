@@ -55,4 +55,5 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style BasedOn="{StaticResource DefaultButtonStyle}" TargetType="{x:Type Button}" />
 </ResourceDictionary>

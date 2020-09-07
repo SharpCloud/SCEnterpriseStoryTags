@@ -7,7 +7,7 @@
         Background="{StaticResource AppBackground}"
         FontSize="{StaticResource DefaultFontSize}"
         Height="450"
-        Title="SharpCloud Enterprise story tag builder v"
+        Title="SharpCloud Enterprise Story Tag Builder v"
         UseLayoutRounding="True"
         Width="800">
     <Grid Background="Black">
@@ -120,7 +120,13 @@
                     <StackPanel VerticalAlignment="Center">
                         <Button Content="Do it" Height="40" Width="200" Click="Button_Click" x:Name="button"/>
                         <StackPanel Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <CheckBox Content="Remove old tags" HorizontalAlignment="Center" x:Name="chkRemoveOldtags" VerticalAlignment="Center"/>
+                            <CheckBox x:Name="chkRemoveOldtags"
+                                      Foreground="{StaticResource TextBlue}"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      VerticalContentAlignment="Center">
+                                Remove old tags
+                            </CheckBox>
                             <Image Height="20" Margin="10,0" Source="Images/Information.png">
                                 <Image.ToolTip>
                                     <TextBlock>
@@ -145,10 +151,17 @@
                         <TextBlock Margin="100,10" FontSize="15" TextWrapping="Wrap" Text="This widget searches across an Enterprise Solution and tags each item with the names of the stories in which it is being used. This means you can count how often an item is used within the solution. The widget allows you to specify a target team or directory, so you can limit the search (and hence the tagging and count) to only the subset of stories you want to include" />
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="20">
-                        <TextBlock Text="Code available on GitHub/SharpCloud" HorizontalAlignment="Center"/>
-                        <TextBlock Text="Created by SharpCloud" HorizontalAlignment="Center"/>
-                    </StackPanel>
+                        <TextBlock HorizontalAlignment="Center" Margin="0,0,0,4">
+                            <Hyperlink Foreground="White" Click="Hyperlink_OnClick">
+                                Code available on GitHub/SharpCloud
+                            </Hyperlink>
+                        </TextBlock>
 
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="Created by " HorizontalAlignment="Center"/>
+                            <Image Height="20" Source="Images/SharpCloud_123x20.png" />
+                        </StackPanel>
+                    </StackPanel>
                 </Grid>
             </TabItem>
         </TabControl>

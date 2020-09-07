@@ -191,7 +191,9 @@
   <ItemGroup>
     <Resource Include="Images\Information.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\SharpCloud_123x20.png" />
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Flags\EU_40x26.png" />
     <Resource Include="Images\Flags\UK_40x26.png" />

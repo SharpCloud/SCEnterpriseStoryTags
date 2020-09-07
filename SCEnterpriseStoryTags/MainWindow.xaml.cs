@@ -3,6 +3,7 @@ using SC.API.ComInterop.Models;
 using SC.Entities.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -345,6 +346,11 @@ End:
             }
 
             return null;
+        }
+
+        private void Hyperlink_OnClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start("https://github.com/SharpCloud/SCEnterpriseStoryTags");
         }
     }
 }

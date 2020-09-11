@@ -3,6 +3,7 @@ using SCEnterpriseStoryTags.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace SCEnterpriseStoryTags
@@ -29,9 +30,9 @@ namespace SCEnterpriseStoryTags
             Password.Password = ViewModelLocator.PasswordService.LoadPassword();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MainViewModel.ValidateAndRun();
+            await Task.Run(() => ViewModelLocator.MainViewModel.ValidateAndRun());
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)

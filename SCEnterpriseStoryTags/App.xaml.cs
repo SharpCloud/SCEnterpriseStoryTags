@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Threading;
 
 namespace SCEnterpriseStoryTags
 {
@@ -13,6 +16,19 @@ namespace SCEnterpriseStoryTags
 
             var splashScreen = new SplashScreen("Images/Splash.png");
             splashScreen.Show(true, true);
+
+            Current.DispatcherUnhandledException += Current_DispatcherUnhandledException;
+        }
+
+        private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            var message = $"{e.Exception.Message} {e.Exception.StackTrace}";
+
+            var localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SharpCloudEnterpriseStoryTags");
+            var logfile = localPath + "/SCEnterpriseStoryTags.log";
+            Directory.CreateDirectory(localPath);
+            
+            File.AppendAllText(logfile, message);
         }
     }
 }

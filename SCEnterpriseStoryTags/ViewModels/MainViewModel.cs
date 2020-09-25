@@ -285,10 +285,15 @@ namespace SCEnterpriseStoryTags.ViewModels
                     if (ts.Id.ToLower() != Template.ToLower())
                     {
                         var tag = templateStory.ItemTag_FindByName(ts.Name);
+                        var description = $"Created automatically [{DateTime.Now}]";
                         if (tag == null)
                         {
                             SetText($"Tag '{ts.Name}' created.");
-                            tag = templateStory.ItemTag_AddNew(ts.Name, "Created automatically", TagGroup);
+                            tag = templateStory.ItemTag_AddNew(ts.Name, description, TagGroup);
+                        }
+                        else
+                        {
+                            tag.Description = description;
                         }
                         tags.Add(ts.Id, tag);
                     }

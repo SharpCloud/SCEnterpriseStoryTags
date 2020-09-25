@@ -1,4 +1,7 @@
-﻿using SCEnterpriseStoryTags.Interfaces;
+﻿using SC.API.ComInterop;
+using SC.API.ComInterop.Models;
+using SC.Entities.Models;
+using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
 using System;
 using System.Collections.Generic;
@@ -7,9 +10,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using SC.API.ComInterop;
-using SC.API.ComInterop.Models;
-using SC.Entities.Models;
 
 namespace SCEnterpriseStoryTags.ViewModels
 {
@@ -29,6 +29,8 @@ namespace SCEnterpriseStoryTags.ViewModels
         private bool _isIdle = true;
         private string _url;
         private string _username;
+        private Dictionary<string, Story> _stories;
+        private SharpCloudApi _sc;
 
         public Dictionary<FormFields, Action> FormFieldFocusActions { get; set; } = new Dictionary<FormFields, Action>();
 
@@ -248,10 +250,6 @@ namespace SCEnterpriseStoryTags.ViewModels
             DoIt();
         }
 
-        private Dictionary<string, Story> _stories;
-        private SharpCloudApi _sc;
-        private Dictionary<string, ItemTag> _tags;
-
         private void DoIt()
         {
             try
@@ -268,7 +266,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                 SetText($"Template '{templateStory.Name}' Loaded.");
 
-                _tags = new Dictionary<string, ItemTag>();
+                var tags = new Dictionary<string, ItemTag>();
                 // check the story tags exist in the template
                 var teamStories = !IsDirectory ? _sc.StoriesTeam(Team) : _sc.StoriesDirectory(Team);
 
@@ -292,7 +290,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                             SetText($"Tag '{ts.Name}' created.");
                             tag = templateStory.ItemTag_AddNew(ts.Name, "Created automatically", TagGroup);
                         }
-                        _tags.Add(ts.Id, tag);
+                        tags.Add(ts.Id, tag);
                     }
                 }
                 templateStory.Save();
@@ -323,7 +321,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                             {
                                 foreach (var i in story.Items)
                                 {
-                                    RemoveTags(i, _tags);
+                                    RemoveTags(i, tags);
                                 }
                             }
                         }
@@ -356,7 +354,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                         foreach (var i in story.Items)
                         {
-                            UpdateItem(i, _tags[story.Id]);
+                            UpdateItem(i, tags[story.Id]);
                         }
                     }
                 }
@@ -409,14 +407,13 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         private void UpdateItem(Item item, ItemTag storyTag)
         {
-            Story story;
             // check we have the owning story
             if (!_stories.ContainsKey(item.StoryId))
             {
                 SetText("Loading external story...");
                 LoadStoryAndCheckPerms(item.StoryId, item.StoryId);
             }
-            story = _stories[item.StoryId];
+            var story = _stories[item.StoryId];
 
             var sourceItem = story.Item_FindById(item.Id);
             sourceItem.Tag_AddNew(storyTag);
@@ -468,7 +465,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

@@ -12,6 +12,7 @@
                     <SolidColorBrush x:Key="ButtonBlue" Color="#1360C5" />
                     <SolidColorBrush x:Key="ButtonGrey" Color="#515151" />
                     <SolidColorBrush x:Key="TextBlue" Color="#00AFFC" />
+                    <SolidColorBrush x:Key="TextWhite" Color="White" />
                     <system:Double x:Key="DefaultFontSize">14</system:Double>
                     <viewModels:ViewModelLocator x:Key="ViewModelLocator" />
                 </ResourceDictionary>

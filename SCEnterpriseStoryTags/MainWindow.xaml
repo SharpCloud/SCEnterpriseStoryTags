@@ -14,7 +14,26 @@
         Width="800">
 
     <Grid Background="Black">
-        <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="320" MinWidth="80" />
+            <ColumnDefinition Width="3" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Width="3"/>
+
+        <ListView Background="{StaticResource AppBackground}"
+                  Grid.Column="0"
+                  ItemsSource="{Binding Solutions}"
+                  SelectedItem="{Binding SelectedSolution}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Foreground="{StaticResource TextWhite}" Text="{Binding Name}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <TabControl Grid.Column="2" SelectedIndex="{Binding SelectedTabIndex}">
             <!-- Settings Tab -->
             <TabItem Header="Settings">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -43,8 +62,8 @@
                             </Style>
                         </StackPanel.Resources>
 
-                        <Label Content="SiteURL:" />
-                        <TextBox x:Name="Url" Text="{Binding Url}" />
+                        <Label Content="Site URL:" />
+                        <TextBox x:Name="Url" Text="{Binding SelectedSolution.Url}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
                         <Button Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com">
                             <Image Source="Images/Flags/EU_40x26.png" Style="{StaticResource Flag}" />
@@ -59,7 +78,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="UserName:" />
-                        <TextBox x:Name="Username" Text="{Binding Username}" />
+                        <TextBox x:Name="Username" Text="{Binding SelectedSolution.Username}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="Your SharpCloud username" />
                     </StackPanel>
                     
@@ -79,7 +98,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Team/Directory ID:" />
-                        <TextBox x:Name="Team" Text="{Binding Team}" />
+                        <TextBox x:Name="Team" Text="{Binding SelectedSolution.Team}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>
@@ -90,7 +109,7 @@
                             </Image.ToolTip>
                         </Image>
                         <CheckBox Foreground="{StaticResource TextBlue}"
-                                  IsChecked="{Binding IsDirectory, Mode=TwoWay}"
+                                  IsChecked="{Binding SelectedSolution.IsDirectory, Mode=TwoWay}"
                                   VerticalAlignment="Center"
                                   VerticalContentAlignment="Center">
                             Directory
@@ -99,7 +118,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Template ID:" />
-                        <TextBox x:Name="Template" Text="{Binding Template}" />
+                        <TextBox x:Name="Template" Text="{Binding SelectedSolution.Template}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>
@@ -164,7 +183,7 @@
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="20">
                         <TextBlock HorizontalAlignment="Center" Margin="0,0,0,4">
-                            <Hyperlink Foreground="White" Click="Hyperlink_OnClick">
+                            <Hyperlink Foreground="{StaticResource TextWhite}" Click="Hyperlink_OnClick">
                                 Code available on GitHub/SharpCloud
                             </Hyperlink>
                         </TextBlock>

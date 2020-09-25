@@ -120,6 +120,7 @@
     <Compile Include="Interfaces\IMainViewModel.cs" />
     <Compile Include="Interfaces\IPasswordService.cs" />
     <Compile Include="Interfaces\IRegistryService.cs" />
+    <Compile Include="Models\EnterpriseSolution.cs" />
     <Compile Include="Models\FormFields.cs" />
     <Compile Include="Services\PasswordService.cs" />
     <Compile Include="Services\RegistryService.cs" />

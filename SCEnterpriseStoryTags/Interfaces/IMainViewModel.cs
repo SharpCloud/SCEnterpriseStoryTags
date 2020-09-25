@@ -1,7 +1,8 @@
-﻿using System;
+﻿using SCEnterpriseStoryTags.Models;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using SCEnterpriseStoryTags.Models;
 
 namespace SCEnterpriseStoryTags.Interfaces
 {
@@ -9,15 +10,12 @@ namespace SCEnterpriseStoryTags.Interfaces
     {
         Dictionary<FormFields, Action> FormFieldFocusActions { get; set; }
         string AppName { get; }
-        bool IsDirectory { get; set; }
         bool RemoveOldTags { get; set; }
         int SelectedTabIndex { get; set; }
         string Status { get; set; }
-        string Team { get; set; }
-        string Template { get; set; }
         bool IsIdle { get; }
-        string Url { get; set; }
-        string Username { get; set; }
+        EnterpriseSolution SelectedSolution { get; set; }
+        ObservableCollection<EnterpriseSolution> Solutions { get; set; }
 
         void LoadValues();
         void ValidateAndRun();

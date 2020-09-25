@@ -37,17 +37,17 @@ namespace SCEnterpriseStoryTags
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MainViewModel.Url = "https://uk.sharpcloud.com";
+            ViewModelLocator.MainViewModel.SelectedSolution.Url = "https://uk.sharpcloud.com";
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MainViewModel.Url = "https://my.sharpcloud.com";
+            ViewModelLocator.MainViewModel.SelectedSolution.Url = "https://my.sharpcloud.com";
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.MainViewModel.Url = "https://eu.sharpcloud.com";
+            ViewModelLocator.MainViewModel.SelectedSolution.Url = "https://eu.sharpcloud.com";
         }
 
         private void Hyperlink_OnClick(object sender, RoutedEventArgs e)

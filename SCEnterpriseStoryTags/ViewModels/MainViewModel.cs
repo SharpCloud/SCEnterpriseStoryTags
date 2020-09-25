@@ -5,6 +5,7 @@ using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -19,36 +20,19 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         private readonly IPasswordService _passwordService;
         private readonly IRegistryService _registryService;
-
-        private bool _isDirectory;
+        
         private bool _removeOldTags;
         private int _selectedTabIndex;
         private string _status;
-        private string _team;
-        private string _template;
         private bool _isIdle = true;
-        private string _url;
-        private string _username;
+        private EnterpriseSolution _selectedSolution;
         private Dictionary<string, Story> _stories;
+        private ObservableCollection<EnterpriseSolution> _solutions;
         private SharpCloudApi _sc;
 
         public Dictionary<FormFields, Action> FormFieldFocusActions { get; set; } = new Dictionary<FormFields, Action>();
 
         public string AppName { get; }
-
-        public bool IsDirectory
-        {
-            get => _isDirectory;
-
-            set
-            {
-                if (_isDirectory != value)
-                {
-                    _isDirectory = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
 
         public bool RemoveOldTags
         {
@@ -92,34 +76,6 @@ namespace SCEnterpriseStoryTags.ViewModels
             }
         }
 
-        public string Team
-        {
-            get => _team;
-
-            set
-            {
-                if (_team != value)
-                {
-                    _team = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string Template
-        {
-            get => _template;
-
-            set
-            {
-                if (_template != value)
-                {
-                    _template = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
         public bool IsIdle
         {
             get => _isIdle;
@@ -134,29 +90,29 @@ namespace SCEnterpriseStoryTags.ViewModels
             }
         }
 
-        public string Url
+        public EnterpriseSolution SelectedSolution
         {
-            get => _url;
+            get => _selectedSolution;
 
             set
             {
-                if (_url != value)
+                if (_selectedSolution != value)
                 {
-                    _url = value;
+                    _selectedSolution = value;
                     OnPropertyChanged();
                 }
             }
         }
 
-        public string Username
+        public ObservableCollection<EnterpriseSolution> Solutions
         {
-            get => _username;
+            get => _solutions;
 
             set
             {
-                if (_username != value)
+                if (_solutions != value)
                 {
-                    _username = value;
+                    _solutions = value;
                     OnPropertyChanged();
                 }
             }
@@ -170,15 +126,24 @@ namespace SCEnterpriseStoryTags.ViewModels
             _registryService = registryService;
 
             AppName = GetAppName();
+
+            Solutions = new ObservableCollection<EnterpriseSolution>
+            {
+                new EnterpriseSolution
+                {
+                    Name = "My Enterprise Solution"
+                }
+            };
+            SelectedSolution = Solutions[0];
         }
 
         public void LoadValues()
         {
-            Url = _registryService.RegRead("Url", "https://uk.sharpcloud.com");
-            Username = _registryService.RegRead("Uname", "");
-            Team = _registryService.RegRead("TeamId", "");
-            Template = _registryService.RegRead("Template", "");
-            IsDirectory = bool.Parse(_registryService.RegRead("Directory", "false"));
+            SelectedSolution.Url = _registryService.RegRead("Url", "https://uk.sharpcloud.com");
+            SelectedSolution.Username = _registryService.RegRead("Uname", "");
+            SelectedSolution.Team = _registryService.RegRead("TeamId", "");
+            SelectedSolution.Template = _registryService.RegRead("Template", "");
+            SelectedSolution.IsDirectory = bool.Parse(_registryService.RegRead("Directory", "false"));
 
             if (IsValid())
             {
@@ -211,12 +176,12 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         private string IsValidText()
         {
-            if (string.IsNullOrEmpty(Url) || !Url.StartsWith("http"))
+            if (string.IsNullOrEmpty(SelectedSolution.Url) || !SelectedSolution.Url.StartsWith("http"))
             {
                 FormFieldFocusActions[FormFields.Url]();
                 return "Please provide a valid URL (e.g. https://my.sharpcloud.com)";
             }
-            if (string.IsNullOrEmpty(Username))
+            if (string.IsNullOrEmpty(SelectedSolution.Username))
             {
                 FormFieldFocusActions[FormFields.Username]();
                 return "Please provide a valid username";
@@ -226,12 +191,12 @@ namespace SCEnterpriseStoryTags.ViewModels
                 FormFieldFocusActions[FormFields.Password]();
                 return "Please provide your password";
             }
-            if (string.IsNullOrEmpty(Team))
+            if (string.IsNullOrEmpty(SelectedSolution.Team))
             {
                 FormFieldFocusActions[FormFields.Team]();
                 return "Please provide the team Id. This is all lowercase, no spaces.";
             }
-            if (string.IsNullOrEmpty(Template))
+            if (string.IsNullOrEmpty(SelectedSolution.Template))
             {
                 FormFieldFocusActions[FormFields.Template]();
                 return "Please provide the ID of the template story to store the tags. This does not need to be in the team.";
@@ -256,23 +221,23 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 IsIdle = false;
 
-                _sc = new SharpCloudApi(Username, _passwordService.LoadPassword(), Url);
+                _sc = new SharpCloudApi(SelectedSolution.Username, _passwordService.LoadPassword(), SelectedSolution.Url);
 
                 Status = string.Empty;
 
                 SetText("Reading template...");
 
-                var templateStory = _sc.LoadStory(Template);
+                var templateStory = _sc.LoadStory(SelectedSolution.Template);
 
                 SetText($"Template '{templateStory.Name}' Loaded.");
 
                 var tags = new Dictionary<string, ItemTag>();
                 // check the story tags exist in the template
-                var teamStories = !IsDirectory ? _sc.StoriesTeam(Team) : _sc.StoriesDirectory(Team);
+                var teamStories = !SelectedSolution.IsDirectory ? _sc.StoriesTeam(SelectedSolution.Team) : _sc.StoriesDirectory(SelectedSolution.Team);
 
                 if (teamStories == null)
                 {
-                    SetText(!IsDirectory
+                    SetText(!SelectedSolution.IsDirectory
                         ? $"Oops... Looks like your team does not exist"
                         : $"Oops... Looks like your directory does not exist");
 
@@ -282,7 +247,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                 foreach (var ts in teamStories)
                 {
-                    if (ts.Id.ToLower() != Template.ToLower())
+                    if (ts.Id.ToLower() != SelectedSolution.Template.ToLower())
                     {
                         var tag = templateStory.ItemTag_FindByName(ts.Name);
                         var description = $"Created automatically [{DateTime.Now}]";
@@ -314,7 +279,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                     foreach (var ts in teamStories)
                     {
-                        if (ts.Id.ToLower() != Template.ToLower())
+                        if (ts.Id.ToLower() != SelectedSolution.Template.ToLower())
                         {
                             if (!_stories.ContainsKey(ts.Id))
                             {
@@ -349,7 +314,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 // assign new tags
                 foreach (var ts in teamStories)
                 {
-                    if (ts.Id.ToLower() != Template.ToLower())
+                    if (ts.Id.ToLower() != SelectedSolution.Template.ToLower())
                     {
                         if (!_stories.ContainsKey(ts.Id))
                         {
@@ -437,7 +402,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 var story = _sc.LoadStory(id);
 
-                var perms = story.StoryAsRoadmap.GetPermission(Username);
+                var perms = story.StoryAsRoadmap.GetPermission(SelectedSolution.Username);
 
                 if (perms != ShareAction.owner && perms != ShareAction.admin)
                 {
@@ -461,11 +426,11 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         private void SaveValues()
         {
-            _registryService.RegWrite("Url", Url);
-            _registryService.RegWrite("Uname", Username);
-            _registryService.RegWrite("TeamId", Team);
-            _registryService.RegWrite("Template", Template);
-            _registryService.RegWrite("Directory", IsDirectory.ToString());
+            _registryService.RegWrite("Url", SelectedSolution.Url);
+            _registryService.RegWrite("Uname", SelectedSolution.Username);
+            _registryService.RegWrite("TeamId", SelectedSolution.Team);
+            _registryService.RegWrite("Template", SelectedSolution.Template);
+            _registryService.RegWrite("Directory", SelectedSolution.IsDirectory.ToString());
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -6,6 +6,7 @@
         xmlns:viewModels="clr-namespace:SCEnterpriseStoryTags.ViewModels"
         mc:Ignorable="d"
         Background="{StaticResource AppBackground}"
+        Closing="MainWindow_OnClosing"
         DataContext="{Binding MainViewModel, Source={StaticResource ViewModelLocator}}"
         FontSize="{StaticResource DefaultFontSize}"
         Height="450"

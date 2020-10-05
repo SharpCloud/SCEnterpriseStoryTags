@@ -18,6 +18,7 @@ namespace SCEnterpriseStoryTags.Interfaces
         ObservableCollection<EnterpriseSolution> Solutions { get; set; }
 
         void LoadValues();
+        void SaveValues();
         void ValidateAndRun();
     }
 }

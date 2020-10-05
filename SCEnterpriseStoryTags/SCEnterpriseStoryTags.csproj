@@ -122,6 +122,8 @@
     <Compile Include="Interfaces\IRegistryService.cs" />
     <Compile Include="Models\EnterpriseSolution.cs" />
     <Compile Include="Models\FormFields.cs" />
+    <Compile Include="Models\SaveData.cs" />
+    <Compile Include="Services\IOService.cs" />
     <Compile Include="Services\PasswordService.cs" />
     <Compile Include="Services\RegistryService.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />

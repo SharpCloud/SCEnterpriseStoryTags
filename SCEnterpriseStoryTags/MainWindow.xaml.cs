@@ -2,6 +2,7 @@
 using SCEnterpriseStoryTags.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
@@ -58,6 +59,11 @@ namespace SCEnterpriseStoryTags
         private void PasswordChanged(object sender, RoutedEventArgs e)
         {
             ViewModelLocator.PasswordService.SavePassword(Password.Password);
+        }
+
+        private void MainWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            ViewModelLocator.MainViewModel.SaveValues();
         }
     }
 }

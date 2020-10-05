@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using SCEnterpriseStoryTags.Services;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -23,12 +22,7 @@ namespace SCEnterpriseStoryTags
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             var message = $"{e.Exception.Message} {e.Exception.StackTrace}";
-
-            var localPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SharpCloudEnterpriseStoryTags");
-            var logfile = localPath + "/SCEnterpriseStoryTags.log";
-            Directory.CreateDirectory(localPath);
-            
-            File.AppendAllText(logfile, message);
+            IOService.WriteToFile("SCEnterpriseStoryTags.log", message, false);
         }
     }
 }

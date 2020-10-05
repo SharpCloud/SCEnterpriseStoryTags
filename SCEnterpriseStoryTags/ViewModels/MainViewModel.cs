@@ -8,14 +8,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using Newtonsoft.Json;
+using SCEnterpriseStoryTags.Services;
+using Directory = System.IO.Directory;
 
 namespace SCEnterpriseStoryTags.ViewModels
 {
     public class MainViewModel : IMainViewModel
     {
+        private const string ConfigFile = "SCEnterpriseStoryTags.json";
         private const string TagGroup = "UsedInStories";
 
         private readonly IPasswordService _passwordService;
@@ -126,24 +132,28 @@ namespace SCEnterpriseStoryTags.ViewModels
             _registryService = registryService;
 
             AppName = GetAppName();
-
-            Solutions = new ObservableCollection<EnterpriseSolution>
-            {
-                new EnterpriseSolution
-                {
-                    Name = "My Enterprise Solution"
-                }
-            };
-            SelectedSolution = Solutions[0];
         }
 
         public void LoadValues()
         {
-            SelectedSolution.Url = _registryService.RegRead("Url", "https://uk.sharpcloud.com");
-            SelectedSolution.Username = _registryService.RegRead("Uname", "");
-            SelectedSolution.Team = _registryService.RegRead("TeamId", "");
-            SelectedSolution.Template = _registryService.RegRead("Template", "");
-            SelectedSolution.IsDirectory = bool.Parse(_registryService.RegRead("Directory", "false"));
+            var json = IOService.ReadFromFile(ConfigFile);
+            var config = JsonConvert.DeserializeObject<SaveData>(json) ?? new SaveData
+            {
+                Solutions = new ObservableCollection<EnterpriseSolution>
+                {
+                    new EnterpriseSolution
+                    {
+                        Name = "Enterprise Solution"
+                    }
+                }
+            };
+            
+            Solutions = new ObservableCollection<EnterpriseSolution>(config.Solutions);
+
+            if (Solutions.Count > 0)
+            {
+                SelectedSolution = Solutions[0];
+            }
 
             if (IsValid())
             {
@@ -424,13 +434,15 @@ namespace SCEnterpriseStoryTags.ViewModels
             }
         }
 
-        private void SaveValues()
+        public void SaveValues()
         {
-            _registryService.RegWrite("Url", SelectedSolution.Url);
-            _registryService.RegWrite("Uname", SelectedSolution.Username);
-            _registryService.RegWrite("TeamId", SelectedSolution.Team);
-            _registryService.RegWrite("Template", SelectedSolution.Template);
-            _registryService.RegWrite("Directory", SelectedSolution.IsDirectory.ToString());
+            var data = new SaveData
+            {
+                Solutions = Solutions
+            };
+
+            var json = JsonConvert.SerializeObject(data);
+            IOService.WriteToFile(ConfigFile, json, true);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -40,6 +40,9 @@ namespace SCEnterpriseStoryTags.Models
             }
         }
 
+        public string Password { get; set; }
+        public string PasswordEntropy { get; set; }
+
         public string Team
         {
             get => _team;

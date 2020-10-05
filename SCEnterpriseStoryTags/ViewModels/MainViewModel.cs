@@ -1,21 +1,18 @@
-﻿using SC.API.ComInterop;
+﻿using Newtonsoft.Json;
+using SC.API.ComInterop;
 using SC.API.ComInterop.Models;
 using SC.Entities.Models;
 using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
+using SCEnterpriseStoryTags.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
-using Newtonsoft.Json;
-using SCEnterpriseStoryTags.Services;
-using Directory = System.IO.Directory;
 
 namespace SCEnterpriseStoryTags.ViewModels
 {
@@ -25,8 +22,7 @@ namespace SCEnterpriseStoryTags.ViewModels
         private const string TagGroup = "UsedInStories";
 
         private readonly IPasswordService _passwordService;
-        private readonly IRegistryService _registryService;
-        
+
         private bool _removeOldTags;
         private int _selectedTabIndex;
         private string _status;
@@ -124,13 +120,9 @@ namespace SCEnterpriseStoryTags.ViewModels
             }
         }
 
-        public MainViewModel(
-            IPasswordService passwordService,
-            IRegistryService registryService)
+        public MainViewModel(IPasswordService passwordService)
         {
             _passwordService = passwordService;
-            _registryService = registryService;
-
             AppName = GetAppName();
         }
 
@@ -196,7 +188,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 FormFieldFocusActions[FormFields.Username]();
                 return "Please provide a valid username";
             }
-            if (string.IsNullOrEmpty(_passwordService.LoadPassword()))
+            if (string.IsNullOrEmpty(SelectedSolution.Password))
             {
                 FormFieldFocusActions[FormFields.Password]();
                 return "Please provide your password";
@@ -231,7 +223,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 IsIdle = false;
 
-                _sc = new SharpCloudApi(SelectedSolution.Username, _passwordService.LoadPassword(), SelectedSolution.Url);
+                _sc = new SharpCloudApi(SelectedSolution.Username, SelectedSolution.Password, SelectedSolution.Url);
 
                 Status = string.Empty;
 

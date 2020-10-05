@@ -1,8 +1,10 @@
-﻿namespace SCEnterpriseStoryTags.Interfaces
+﻿using SCEnterpriseStoryTags.Models;
+
+namespace SCEnterpriseStoryTags.Interfaces
 {
     public interface IPasswordService
     {
-        string LoadPassword();
-        void SavePassword(string password);
+        string LoadPassword(EnterpriseSolution solution);
+        void SavePassword(string password, EnterpriseSolution solution);
     }
 }

@@ -17,6 +17,7 @@ namespace SCEnterpriseStoryTags
         public MainWindow()
         {
             InitializeComponent();
+            ViewModelLocator.MainViewModel.PropertyChanged += MainViewModelPropertyChanged;
 
             ViewModelLocator.MainViewModel.FormFieldFocusActions = new Dictionary<FormFields, Action>
             {
@@ -28,7 +29,15 @@ namespace SCEnterpriseStoryTags
             };
 
             ViewModelLocator.MainViewModel.LoadValues();
-            Password.Password = ViewModelLocator.PasswordService.LoadPassword();
+        }
+
+        private void MainViewModelPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MainViewModel.SelectedSolution))
+            {
+                Password.Password = ViewModelLocator.PasswordService.LoadPassword(
+                    ViewModelLocator.MainViewModel.SelectedSolution);
+            }
         }
 
         private async void Button_Click(object sender, RoutedEventArgs e)
@@ -58,7 +67,9 @@ namespace SCEnterpriseStoryTags
 
         private void PasswordChanged(object sender, RoutedEventArgs e)
         {
-            ViewModelLocator.PasswordService.SavePassword(Password.Password);
+            ViewModelLocator.PasswordService.SavePassword(
+                Password.Password,
+                ViewModelLocator.MainViewModel.SelectedSolution);
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)

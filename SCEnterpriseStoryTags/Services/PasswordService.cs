@@ -1,4 +1,5 @@
 ﻿using SCEnterpriseStoryTags.Interfaces;
+using SCEnterpriseStoryTags.Models;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,51 +8,26 @@ namespace SCEnterpriseStoryTags.Services
 {
     public class PasswordService : IPasswordService
     {
-        private const string Password = "Password";
-        private const string Dpapi = "Dpapi";
-        private const string Entropy = "Entropy";
-
         private readonly Encoding _textEncoding = Encoding.UTF8;
-        private readonly IRegistryService _registryService;
 
-        public PasswordService(IRegistryService registryService)
+        public string LoadPassword(EnterpriseSolution solution)
         {
-            _registryService = registryService;
+            return _textEncoding.GetString(
+                Decrypt(
+                    solution.Password,
+                    solution.PasswordEntropy,
+                    DataProtectionScope.CurrentUser));
         }
 
-        public string LoadPassword()
+        public void SavePassword(string password, EnterpriseSolution solution)
         {
-            var regPassword = _registryService.RegRead($"{Password}{Dpapi}", string.Empty);
-            var regPasswordEntropy = _registryService.RegRead($"{Password}{Dpapi}{Entropy}", null);
-            try
-            {
-                return _textEncoding.GetString(
-                    Decrypt(
-                        regPassword,
-                        regPasswordEntropy,
-                        DataProtectionScope.CurrentUser));
-            }
-            catch (CryptographicException ex) when (ex.Message.Contains("The parameter is incorrect"))
-            {
-                // Fallback method for backwards compatibility
-                regPassword = _registryService.RegRead(Password, string.Empty);
-
-                _registryService.RegDelete(Password);
-
-                return Encoding.Default.GetString(
-                    Convert.FromBase64String(regPassword));
-            }
-        }
-
-        public void SavePassword(string password)
-        {
-            _registryService.RegWrite($"{Password}{Dpapi}", Convert.ToBase64String(
+            solution.Password = Convert.ToBase64String(
                 Encrypt(
                     _textEncoding.GetBytes(password),
                     out var entropy,
-                    DataProtectionScope.CurrentUser)));
+                    DataProtectionScope.CurrentUser));
 
-            _registryService.RegWrite($"{Password}{Dpapi}{Entropy}", Convert.ToBase64String(entropy));
+            solution.PasswordEntropy = Convert.ToBase64String(entropy);
         }
 
         private byte[] Decrypt(string base64CipherText, string entropy, DataProtectionScope scope)

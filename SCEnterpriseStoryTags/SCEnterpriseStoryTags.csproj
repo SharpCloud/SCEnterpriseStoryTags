@@ -125,7 +125,6 @@
     <Compile Include="Models\SaveData.cs" />
     <Compile Include="Services\IOService.cs" />
     <Compile Include="Services\PasswordService.cs" />
-    <Compile Include="Services\RegistryService.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />
     <Page Include="Dictionaries\Button.xaml">

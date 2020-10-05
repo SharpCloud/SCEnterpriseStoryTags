@@ -11,7 +11,7 @@
         Height="450"
         Title="{Binding AppName}"
         UseLayoutRounding="True"
-        Width="800">
+        Width="1000">
 
     <Grid Background="Black">
         <Grid.ColumnDefinitions>
@@ -47,6 +47,12 @@
                         <Style BasedOn="{StaticResource DataEntry}" TargetType="PasswordBox" />
                         <Style BasedOn="{StaticResource DataEntry}" TargetType="TextBox" />
                     </StackPanel.Resources>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Solution Name:" />
+                        <TextBox Text="{Binding SelectedSolution.Name}" />
+                        <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="Name to identify this solution configuration" />
+                    </StackPanel>
 
                     <StackPanel Orientation="Horizontal">
                         <StackPanel.Resources>

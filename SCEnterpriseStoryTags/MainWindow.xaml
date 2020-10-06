@@ -41,6 +41,13 @@
             </ListView>
 
             <Grid Grid.Row="1">
+                <Grid.Resources>
+                    <Style TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+                        <Setter Property="Height" Value="40" />
+                        <Setter Property="Margin" Value="2" />
+                    </Style>
+                </Grid.Resources>
+
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -50,32 +57,41 @@
                 </Grid.ColumnDefinitions>
 
                 <Button Command="{Binding CommandsViewModel.AddSolution, Source={StaticResource ViewModelLocator}}"
-                        Grid.Column="0">
-                    Add
+                        Grid.Column="0"
+                        ToolTip="Add new solution configuration">
+                    <Path Data="M 0,1 L1,1 L1,0 L2,0 L2,1 L3,1 L3,2 L2,2 L2,3 L1,3 L1,2 L0,2 Z" Fill="White" Height="20" Width="20" Stretch="Uniform" />
                 </Button>
 
-                <Button Command="{Binding CommandsViewModel.RemoveSolution, Source={StaticResource ViewModelLocator}}"
+                <Button Background="{StaticResource ButtonGrey}"
+                        Command="{Binding CommandsViewModel.MoveSolutionUp, Source={StaticResource ViewModelLocator}}"
                         CommandParameter="{Binding SelectedSolution}"
-                        Grid.Column="1">
-                    Delete
+                        Grid.Column="1"
+                        ToolTip="Move selected solution configuration up">
+                    <Image Source="Images/Buttons/Up_white.png" Width="20" />
                 </Button>
 
-                <Button Command="{Binding CommandsViewModel.MoveSolutionUp, Source={StaticResource ViewModelLocator}}"
+                <Button Background="{StaticResource ButtonGrey}"
+                        Command="{Binding CommandsViewModel.MoveSolutionDown, Source={StaticResource ViewModelLocator}}"
                         CommandParameter="{Binding SelectedSolution}"
-                        Grid.Column="2">
-                    Up
+                        Grid.Column="2"
+                        ToolTip="Move selected solution configuration down">
+                    <Image Source="Images/Buttons/Down_white.png" Width="20" />
                 </Button>
 
-                <Button Command="{Binding CommandsViewModel.MoveSolutionDown, Source={StaticResource ViewModelLocator}}"
+                <Button Background="{StaticResource ButtonGrey}"
+                        Command="{Binding CommandsViewModel.CopySolution, Source={StaticResource ViewModelLocator}}"
                         CommandParameter="{Binding SelectedSolution}"
-                        Grid.Column="3">
-                    Down
+                        Grid.Column="3"
+                        ToolTip="Copy selected solution configuration">
+                    <Image Source="Images/Buttons/Copy_white.png" Width="20" />
                 </Button>
 
-                <Button Command="{Binding CommandsViewModel.CopySolution, Source={StaticResource ViewModelLocator}}"
+                <Button Background="{StaticResource ButtonRed}"
+                        Command="{Binding CommandsViewModel.RemoveSolution, Source={StaticResource ViewModelLocator}}"
                         CommandParameter="{Binding SelectedSolution}"
-                        Grid.Column="4">
-                    Copy
+                        Grid.Column="4"
+                        ToolTip="Remove selected solution configuration">
+                    <Image Source="Images/Buttons/Bin_white.png" Width="20" />
                 </Button>
             </Grid>
         </Grid>

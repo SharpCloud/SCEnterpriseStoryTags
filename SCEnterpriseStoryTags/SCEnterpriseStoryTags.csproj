@@ -215,5 +215,11 @@
     <Resource Include="Images\Flags\US_40x26.png" />
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\Buttons\Bin_white.png" />
+    <Resource Include="Images\Buttons\Copy_white.png" />
+    <Resource Include="Images\Buttons\Down_white.png" />
+    <Resource Include="Images\Buttons\Up_white.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

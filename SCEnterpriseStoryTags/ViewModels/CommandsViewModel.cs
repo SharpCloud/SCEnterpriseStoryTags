@@ -8,6 +8,7 @@ namespace SCEnterpriseStoryTags.ViewModels
     public class CommandsViewModel : ICommandsViewModel
     {
         public ActionCommand<object> AddSolution { get; }
+        public ActionCommand<EnterpriseSolution> CopySolution { get; }
         public ActionCommand<EnterpriseSolution> MoveSolutionDown { get; }
         public ActionCommand<EnterpriseSolution> MoveSolutionUp { get; }
         public ActionCommand<EnterpriseSolution> RemoveSolution { get; }
@@ -21,6 +22,9 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 mainViewModel.AddNewSolution();
             });
+
+            CopySolution = new ActionCommand<EnterpriseSolution>(
+                mainViewModel.CopySolution);
 
             RemoveSolution = new ActionCommand<EnterpriseSolution>(
                 mainViewModel.RemoveSolution);

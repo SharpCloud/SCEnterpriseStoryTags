@@ -442,6 +442,15 @@ namespace SCEnterpriseStoryTags.ViewModels
             SelectedSolution = solution;
         }
 
+        public void CopySolution(EnterpriseSolution solution)
+        {
+            var index = Solutions.IndexOf(solution);
+            var json = JsonConvert.SerializeObject(solution);
+            var copy = JsonConvert.DeserializeObject<EnterpriseSolution>(json);
+            copy.Name = CreateUniqueName($"Copy of {copy.Name}");
+            Solutions.Insert(index + 1, copy);
+        }
+
         public void RemoveSolution(EnterpriseSolution solution)
         {
             var index = Solutions.IndexOf(solution);
@@ -477,6 +486,20 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 Solutions.Move(index, index + 1);
             }
+        }
+
+        private string CreateUniqueName(string originalName)
+        {
+            var name = originalName;
+            var counter = 2;
+
+            while (Solutions.Select(s => s.Name).Contains(name))
+            {
+                name = originalName + $" ({counter})";
+                counter++;
+            }
+
+            return name;
         }
 
         private EnterpriseSolution CreateDefaultSolution()

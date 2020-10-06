@@ -46,6 +46,7 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                     <ColumnDefinition />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
                 <Button Command="{Binding CommandsViewModel.AddSolution, Source={StaticResource ViewModelLocator}}"
@@ -69,6 +70,12 @@
                         CommandParameter="{Binding SelectedSolution}"
                         Grid.Column="3">
                     Down
+                </Button>
+
+                <Button Command="{Binding CommandsViewModel.CopySolution, Source={StaticResource ViewModelLocator}}"
+                        CommandParameter="{Binding SelectedSolution}"
+                        Grid.Column="4">
+                    Copy
                 </Button>
             </Grid>
         </Grid>

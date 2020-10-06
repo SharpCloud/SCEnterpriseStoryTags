@@ -18,6 +18,7 @@ namespace SCEnterpriseStoryTags.Interfaces
         ObservableCollection<EnterpriseSolution> Solutions { get; set; }
 
         void AddNewSolution();
+        void CopySolution(EnterpriseSolution solution);
         void LoadValues();
         void MoveSolutionDown(EnterpriseSolution solution);
         void MoveSolutionUp(EnterpriseSolution solution);

@@ -1,0 +1,37 @@
+﻿using System.Threading.Tasks;
+using SCEnterpriseStoryTags.Commands;
+using SCEnterpriseStoryTags.Interfaces;
+using SCEnterpriseStoryTags.Models;
+
+namespace SCEnterpriseStoryTags.ViewModels
+{
+    public class CommandsViewModel : ICommandsViewModel
+    {
+        public ActionCommand<object> AddSolution { get; }
+        public ActionCommand<EnterpriseSolution> RemoveSolution { get; }
+        public ActionCommand<string> SetSolutionUrl { get; }
+        public ActionCommand<object> ValidateAndRun { get; }
+        public GoToUrl GoToUrl { get; } = new GoToUrl();
+
+        public CommandsViewModel(IMainViewModel mainViewModel)
+        {
+            AddSolution = new ActionCommand<object>(arg =>
+            {
+                mainViewModel.AddNewSolution();
+            });
+
+            RemoveSolution = new ActionCommand<EnterpriseSolution>(
+                mainViewModel.RemoveSolution);
+
+            SetSolutionUrl = new ActionCommand<string>(url =>
+            {
+                mainViewModel.SelectedSolution.Url = url;
+            });
+
+            ValidateAndRun = new ActionCommand<object>(async arg =>
+            {
+                await Task.Run(() => ViewModelLocator.MainViewModel.ValidateAndRun());
+            });
+        }
+    }
+}

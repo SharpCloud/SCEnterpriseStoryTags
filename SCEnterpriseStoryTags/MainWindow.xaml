@@ -46,8 +46,16 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" Click="AddSolution_OnClick">Add</Button>
-                <Button Grid.Column="1" Click="RemoveSolution_OnClick">Delete</Button>
+                <Button Command="{Binding CommandsViewModel.AddSolution, Source={StaticResource ViewModelLocator}}"
+                        Grid.Column="0">
+                    Add
+                </Button>
+
+                <Button Command="{Binding CommandsViewModel.RemoveSolution, Source={StaticResource ViewModelLocator}}"
+                        CommandParameter="{Binding SelectedSolution}"
+                        Grid.Column="1">
+                    Delete
+                </Button>
             </Grid>
         </Grid>
 
@@ -89,13 +97,19 @@
                         <Label Content="Site URL:" />
                         <TextBox x:Name="Url" Text="{Binding SelectedSolution.Url}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
-                        <Button Click="Button_Click_3" ToolTip="https://eu.sharpcloud.com">
+                        <Button Command="{Binding CommandsViewModel.SetSolutionUrl, Source={StaticResource ViewModelLocator}}"
+                                CommandParameter="https://eu.sharpcloud.com"
+                                ToolTip="https://eu.sharpcloud.com">
                             <Image Source="Images/Flags/EU_40x26.png" Style="{StaticResource Flag}" />
                         </Button>
-                        <Button Click="Button_Click_1" ToolTip="https://uk.sharpcloud.com">
+                        <Button Command="{Binding CommandsViewModel.SetSolutionUrl, Source={StaticResource ViewModelLocator}}"
+                                CommandParameter="https://uk.sharpcloud.com"
+                                ToolTip="https://uk.sharpcloud.com">
                             <Image Source="Images/Flags/UK_40x26.png" Style="{StaticResource Flag}" />
                         </Button>
-                        <Button Click="Button_Click_2" ToolTip="https://my.sharpcloud.com">
+                        <Button Command="{Binding CommandsViewModel.SetSolutionUrl, Source={StaticResource ViewModelLocator}}"
+                                CommandParameter="https://my.sharpcloud.com"
+                                ToolTip="https://my.sharpcloud.com">
                             <Image Source="Images/Flags/US_40x26.png" Style="{StaticResource Flag}" />
                         </Button>
                     </StackPanel>
@@ -164,7 +178,12 @@
                         <RowDefinition  />
                     </Grid.RowDefinitions>
                     <StackPanel VerticalAlignment="Center">
-                        <Button Content="Do it" Height="40" Width="200" Click="Button_Click" IsEnabled="{Binding IsIdle}" />
+                        <Button Command="{Binding CommandsViewModel.ValidateAndRun, Source={StaticResource ViewModelLocator}}"
+                                Content="Do it"
+                                Height="40"
+                                Width="200"
+                                IsEnabled="{Binding IsIdle}" />
+
                         <StackPanel Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
                             <CheckBox Foreground="{StaticResource TextBlue}"
                                       HorizontalAlignment="Center"
@@ -207,7 +226,9 @@
                     </StackPanel>
                     <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="20">
                         <TextBlock HorizontalAlignment="Center" Margin="0,0,0,4">
-                            <Hyperlink Foreground="{StaticResource TextWhite}" Click="Hyperlink_OnClick">
+                            <Hyperlink Command="{Binding CommandsViewModel.GoToUrl, Source={StaticResource ViewModelLocator}}"
+                                       CommandParameter="https://github.com/SharpCloud/SCEnterpriseStoryTags"
+                                       Foreground="{StaticResource TextWhite}">
                                 Code available on GitHub/SharpCloud
                             </Hyperlink>
                         </TextBlock>

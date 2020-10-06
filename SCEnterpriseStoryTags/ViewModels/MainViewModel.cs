@@ -186,7 +186,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 FormFieldFocusActions[FormFields.Username]();
                 return "Please provide a valid username";
             }
-            if (string.IsNullOrEmpty(SelectedSolution.Password))
+            if (string.IsNullOrEmpty(_passwordService.LoadPassword(SelectedSolution)))
             {
                 FormFieldFocusActions[FormFields.Password]();
                 return "Please provide your password";
@@ -221,7 +221,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 IsIdle = false;
 
-                _sc = new SharpCloudApi(SelectedSolution.Username, SelectedSolution.Password, SelectedSolution.Url);
+                _sc = new SharpCloudApi(SelectedSolution.Username, _passwordService.LoadPassword(SelectedSolution), SelectedSolution.Url);
 
                 Status = string.Empty;
 

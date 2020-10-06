@@ -12,7 +12,7 @@ namespace SCEnterpriseStoryTags.Services
 
         public string LoadPassword(EnterpriseSolution solution)
         {
-            if (solution == null)
+            if (solution == null || string.IsNullOrEmpty(solution.Password))
             {
                 return string.Empty;
             }

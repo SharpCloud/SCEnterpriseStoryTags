@@ -461,6 +461,24 @@ namespace SCEnterpriseStoryTags.ViewModels
             }
         }
 
+        public void MoveSolutionUp(EnterpriseSolution solution)
+        {
+            var index = Solutions.IndexOf(solution);
+            if (index > 0)
+            {
+                Solutions.Move(index, index - 1);
+            }
+        }
+
+        public void MoveSolutionDown(EnterpriseSolution solution)
+        {
+            var index = Solutions.IndexOf(solution);
+            if (index < Solutions.Count - 1)
+            {
+                Solutions.Move(index, index + 1);
+            }
+        }
+
         private EnterpriseSolution CreateDefaultSolution()
         {
             const string defaultName = "Enterprise Solution";

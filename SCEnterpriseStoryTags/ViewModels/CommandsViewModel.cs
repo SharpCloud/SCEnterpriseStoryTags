@@ -8,6 +8,8 @@ namespace SCEnterpriseStoryTags.ViewModels
     public class CommandsViewModel : ICommandsViewModel
     {
         public ActionCommand<object> AddSolution { get; }
+        public ActionCommand<EnterpriseSolution> MoveSolutionDown { get; }
+        public ActionCommand<EnterpriseSolution> MoveSolutionUp { get; }
         public ActionCommand<EnterpriseSolution> RemoveSolution { get; }
         public ActionCommand<string> SetSolutionUrl { get; }
         public ActionCommand<object> ValidateAndRun { get; }
@@ -32,6 +34,12 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 await Task.Run(() => ViewModelLocator.MainViewModel.ValidateAndRun());
             });
+
+            MoveSolutionDown = new ActionCommand<EnterpriseSolution>(
+                mainViewModel.MoveSolutionDown);
+            
+            MoveSolutionUp = new ActionCommand<EnterpriseSolution>(
+                mainViewModel.MoveSolutionUp);
         }
     }
 }

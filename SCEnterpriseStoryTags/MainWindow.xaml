@@ -44,6 +44,8 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
+                    <ColumnDefinition />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
                 <Button Command="{Binding CommandsViewModel.AddSolution, Source={StaticResource ViewModelLocator}}"
@@ -55,6 +57,18 @@
                         CommandParameter="{Binding SelectedSolution}"
                         Grid.Column="1">
                     Delete
+                </Button>
+
+                <Button Command="{Binding CommandsViewModel.MoveSolutionUp, Source={StaticResource ViewModelLocator}}"
+                        CommandParameter="{Binding SelectedSolution}"
+                        Grid.Column="2">
+                    Up
+                </Button>
+
+                <Button Command="{Binding CommandsViewModel.MoveSolutionDown, Source={StaticResource ViewModelLocator}}"
+                        CommandParameter="{Binding SelectedSolution}"
+                        Grid.Column="3">
+                    Down
                 </Button>
             </Grid>
         </Grid>

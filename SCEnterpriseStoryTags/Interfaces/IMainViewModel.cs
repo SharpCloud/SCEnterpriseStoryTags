@@ -19,6 +19,8 @@ namespace SCEnterpriseStoryTags.Interfaces
 
         void AddNewSolution();
         void LoadValues();
+        void MoveSolutionDown(EnterpriseSolution solution);
+        void MoveSolutionUp(EnterpriseSolution solution);
         void RemoveSolution(EnterpriseSolution solution);
         void SaveValues();
         void ValidateAndRun();

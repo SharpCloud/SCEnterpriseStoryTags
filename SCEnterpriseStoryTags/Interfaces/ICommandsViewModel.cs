@@ -6,6 +6,8 @@ namespace SCEnterpriseStoryTags.Interfaces
     public interface ICommandsViewModel
     {
         ActionCommand<object> AddSolution { get; }
+        ActionCommand<EnterpriseSolution> MoveSolutionDown { get; }
+        ActionCommand<EnterpriseSolution> MoveSolutionUp { get; }
         ActionCommand<EnterpriseSolution> RemoveSolution { get; }
         ActionCommand<string> SetSolutionUrl { get; }
         ActionCommand<object> ValidateAndRun { get; }

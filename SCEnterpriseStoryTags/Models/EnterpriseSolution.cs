@@ -8,7 +8,7 @@ namespace SCEnterpriseStoryTags.Models
         private bool _isDirectory;
         private string _name;
         private string _team;
-        private string _template;
+        private string _templateId;
         private string _url;
         private string _username;
 
@@ -57,15 +57,15 @@ namespace SCEnterpriseStoryTags.Models
             }
         }
 
-        public string Template
+        public string TemplateId
         {
-            get => _template;
+            get => _templateId;
 
             set
             {
-                if (_template != value)
+                if (_templateId != value)
                 {
-                    _template = value;
+                    _templateId = value;
                     OnPropertyChanged();
                 }
             }

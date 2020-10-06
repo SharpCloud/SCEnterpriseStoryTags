@@ -142,7 +142,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Template ID:" />
-                        <TextBox x:Name="Template" Text="{Binding SelectedSolution.Template}" />
+                        <TextBox x:Name="TemplateId" Text="{Binding SelectedSolution.TemplateId}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>

@@ -196,7 +196,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 FormFieldFocusActions[FormFields.Team]();
                 return "Please provide the team Id. This is all lowercase, no spaces.";
             }
-            if (string.IsNullOrEmpty(SelectedSolution.Template))
+            if (string.IsNullOrEmpty(SelectedSolution.TemplateId))
             {
                 FormFieldFocusActions[FormFields.Template]();
                 return "Please provide the ID of the template story to store the tags. This does not need to be in the team.";
@@ -227,7 +227,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                 SetText("Reading template...");
 
-                var templateStory = _sc.LoadStory(SelectedSolution.Template);
+                var templateStory = _sc.LoadStory(SelectedSolution.TemplateId);
 
                 SetText($"Template '{templateStory.Name}' Loaded.");
 
@@ -247,7 +247,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                 foreach (var ts in teamStories)
                 {
-                    if (ts.Id.ToLower() != SelectedSolution.Template.ToLower())
+                    if (ts.Id.ToLower() != SelectedSolution.TemplateId.ToLower())
                     {
                         var tag = templateStory.ItemTag_FindByName(ts.Name);
                         var description = $"Created automatically [{DateTime.Now}]";
@@ -279,7 +279,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                     foreach (var ts in teamStories)
                     {
-                        if (ts.Id.ToLower() != SelectedSolution.Template.ToLower())
+                        if (ts.Id.ToLower() != SelectedSolution.TemplateId.ToLower())
                         {
                             if (!_stories.ContainsKey(ts.Id))
                             {
@@ -314,7 +314,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 // assign new tags
                 foreach (var ts in teamStories)
                 {
-                    if (ts.Id.ToLower() != SelectedSolution.Template.ToLower())
+                    if (ts.Id.ToLower() != SelectedSolution.TemplateId.ToLower())
                     {
                         if (!_stories.ContainsKey(ts.Id))
                         {
@@ -368,7 +368,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 {
                     sourceItem.Tag_DeleteById(t.Value.Id);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
 
                 }
@@ -417,7 +417,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 }
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 SetText($"WARNING: there was a problem loading '{name}'");
                 _stories.Add(id, null);

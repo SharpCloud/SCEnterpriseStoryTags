@@ -23,7 +23,7 @@ namespace SCEnterpriseStoryTags
             {
                 [FormFields.Password] = () => this.Password.Focus(),
                 [FormFields.Team] = () => this.Team.Focus(),
-                [FormFields.Template] = () => this.Template.Focus(),
+                [FormFields.Template] = () => this.TemplateId.Focus(),
                 [FormFields.Url] = () => this.Url.Focus(),
                 [FormFields.Username] = () => this.Username.Focus()
             };

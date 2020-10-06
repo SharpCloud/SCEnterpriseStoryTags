@@ -504,15 +504,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         private EnterpriseSolution CreateDefaultSolution()
         {
-            const string defaultName = "Enterprise Solution";
-            var name = defaultName;
-            var counter = 1;
-
-            while (Solutions.Select(s => s.Name).Contains(name))
-            {
-                name = defaultName + $" {counter}";
-                counter++;
-            }
+            var name = CreateUniqueName("Enterprise Solution");
 
             return new EnterpriseSolution
             {

@@ -217,8 +217,31 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             // Assert
 
             Assert.AreEqual("Solution", vm.Solutions[0].Name);
-            Assert.AreEqual("Copy of Solution", vm.Solutions[1].Name);
-            Assert.AreEqual("Copy of Solution (2)", vm.Solutions[2].Name);
+            Assert.AreEqual("Copy of Solution (2)", vm.Solutions[1].Name);
+            Assert.AreEqual("Copy of Solution", vm.Solutions[2].Name);
+        }
+
+        [Test]
+        public void NewSolutionsHaveUniqueNames()
+        {
+            // Arrange
+
+            var vm = new MainViewModel(Mock.Of<IPasswordService>())
+            {
+                Solutions = new ObservableCollection<EnterpriseSolution>()
+            };
+
+            // Act
+
+            vm.AddNewSolution();
+            vm.AddNewSolution();
+            vm.AddNewSolution();
+
+            // Assert
+
+            Assert.AreEqual("Enterprise Solution", vm.Solutions[0].Name);
+            Assert.AreEqual("Enterprise Solution (2)", vm.Solutions[1].Name);
+            Assert.AreEqual("Enterprise Solution (3)", vm.Solutions[2].Name);
         }
     }
 }

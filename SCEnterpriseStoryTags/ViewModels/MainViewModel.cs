@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -133,10 +134,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             {
                 Solutions = new ObservableCollection<EnterpriseSolution>
                 {
-                    new EnterpriseSolution
-                    {
-                        Name = "Enterprise Solution"
-                    }
+                    CreateDefaultSolution()
                 }
             };
             
@@ -435,6 +433,50 @@ namespace SCEnterpriseStoryTags.ViewModels
 
             var json = JsonConvert.SerializeObject(data);
             IOService.WriteToFile(ConfigFile, json, true);
+        }
+
+        public void AddNewSolution()
+        {
+            var solution = CreateDefaultSolution();
+            Solutions.Add(solution);
+            SelectedSolution = solution;
+        }
+
+        public void RemoveSolution(EnterpriseSolution solution)
+        {
+            var index = Solutions.IndexOf(solution);
+
+            if (index > -1)
+            {
+                Solutions.RemoveAt(index);
+
+                if (Solutions.Count > index)
+                {
+                    SelectedSolution = Solutions[index];
+                }
+                else if (Solutions.Count > 0)
+                {
+                    SelectedSolution = Solutions[index - 1];
+                }
+            }
+        }
+
+        private EnterpriseSolution CreateDefaultSolution()
+        {
+            const string defaultName = "Enterprise Solution";
+            var name = defaultName;
+            var counter = 1;
+
+            while (Solutions.Select(s => s.Name).Contains(name))
+            {
+                name = defaultName + $" {counter}";
+                counter++;
+            }
+
+            return new EnterpriseSolution
+            {
+                Name = name
+            };
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

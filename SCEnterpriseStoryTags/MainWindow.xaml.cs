@@ -76,5 +76,16 @@ namespace SCEnterpriseStoryTags
         {
             ViewModelLocator.MainViewModel.SaveValues();
         }
+
+        private void AddSolution_OnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MainViewModel.AddNewSolution();
+        }
+
+        private void RemoveSolution_OnClick(object sender, RoutedEventArgs e)
+        {
+            ViewModelLocator.MainViewModel.RemoveSolution(
+                ViewModelLocator.MainViewModel.SelectedSolution);
+        }
     }
 }

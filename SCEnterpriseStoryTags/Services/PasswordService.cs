@@ -12,6 +12,11 @@ namespace SCEnterpriseStoryTags.Services
 
         public string LoadPassword(EnterpriseSolution solution)
         {
+            if (solution == null)
+            {
+                return string.Empty;
+            }
+
             return _textEncoding.GetString(
                 Decrypt(
                     solution.Password,
@@ -21,6 +26,11 @@ namespace SCEnterpriseStoryTags.Services
 
         public void SavePassword(string password, EnterpriseSolution solution)
         {
+            if (solution == null)
+            {
+                return;
+            }
+
             solution.Password = Convert.ToBase64String(
                 Encrypt(
                     _textEncoding.GetBytes(password),

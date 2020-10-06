@@ -23,16 +23,33 @@
 
         <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" Width="3"/>
 
-        <ListView Background="{StaticResource AppBackground}"
-                  Grid.Column="0"
-                  ItemsSource="{Binding Solutions}"
-                  SelectedItem="{Binding SelectedSolution}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Foreground="{StaticResource TextWhite}" Text="{Binding Name}" />
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListView Background="{StaticResource AppBackground}"
+                      Grid.Row="0"
+                      ItemsSource="{Binding Solutions}"
+                      SelectedItem="{Binding SelectedSolution}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Foreground="{StaticResource TextWhite}" Text="{Binding Name}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" Click="AddSolution_OnClick">Add</Button>
+                <Button Grid.Column="1" Click="RemoveSolution_OnClick">Delete</Button>
+            </Grid>
+        </Grid>
 
         <TabControl Grid.Column="2" SelectedIndex="{Binding SelectedTabIndex}">
             <!-- Settings Tab -->

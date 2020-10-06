@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCEnterpriseStoryTags", "SCEnterpriseStoryTags\SCEnterpriseStoryTags.csproj", "{1DDD606F-8C36-4ADC-9B58-DE2FFDD8B7B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SCEnterpriseStoryTags.Tests", "SCEnterpriseStoryTags.Tests\SCEnterpriseStoryTags.Tests.csproj", "{75063928-178C-490C-8970-6254CCF5BEFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{1DDD606F-8C36-4ADC-9B58-DE2FFDD8B7B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DDD606F-8C36-4ADC-9B58-DE2FFDD8B7B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DDD606F-8C36-4ADC-9B58-DE2FFDD8B7B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75063928-178C-490C-8970-6254CCF5BEFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75063928-178C-490C-8970-6254CCF5BEFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75063928-178C-490C-8970-6254CCF5BEFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75063928-178C-490C-8970-6254CCF5BEFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

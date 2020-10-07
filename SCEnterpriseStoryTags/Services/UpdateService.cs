@@ -26,14 +26,11 @@ namespace SCEnterpriseStoryTags.Services
         {
             try
             {
-                _sc = new SharpCloudApi(solution.Username, _passwordService.LoadPassword(solution), solution.Url);
-
                 solution.Status = string.Empty;
-
                 SetText(solution, "Reading template...");
 
+                _sc = new SharpCloudApi(solution.Username, _passwordService.LoadPassword(solution), solution.Url);
                 var templateStory = _sc.LoadStory(solution.TemplateId);
-
                 SetText(solution, $"Template '{templateStory.Name}' Loaded.");
 
                 var tags = new Dictionary<string, ItemTag>();
@@ -43,10 +40,10 @@ namespace SCEnterpriseStoryTags.Services
                 if (teamStories == null)
                 {
                     SetText(solution, !solution.IsDirectory
-                        ? $"Oops... Looks like your team does not exist"
-                        : $"Oops... Looks like your directory does not exist");
+                        ? "Oops... Looks like your team does not exist"
+                        : "Oops... Looks like your directory does not exist");
 
-                    SetText(solution, $"Aborting process");
+                    SetText(solution, "Aborting process");
                     return;
                 }
 
@@ -71,77 +68,14 @@ namespace SCEnterpriseStoryTags.Services
                 templateStory.Save();
                 SetText(solution, $"'{templateStory.Name}' saved.");
 
-
-                Story story;
-
-                // remove any existing tags
                 if (solution.RemoveOldTags)
                 {
-                    SetText(solution, $"Deleting tags");
-
-                    _stories = new Dictionary<string, Story>();
-                    _stories.Add(templateStory.Id, templateStory);
-
-                    foreach (var ts in teamStories)
-                    {
-                        if (ts.Id.ToLower() != solution.TemplateId.ToLower())
-                        {
-                            if (!_stories.ContainsKey(ts.Id))
-                            {
-                                LoadStoryAndCheckPerms(solution, ts.Id, ts.Name);
-                            }
-                            story = _stories[ts.Id];
-
-                            if (story != null)
-                            {
-                                foreach (var i in story.Items)
-                                {
-                                    RemoveTags(solution, i, tags);
-                                }
-                            }
-                        }
-                    }
-
-                    // save
-                    foreach (var s in _stories)
-                    {
-                        SetText(solution, $"Saving '{s.Value.Name}'");
-                        s.Value.Save();
-                    }
-
+                    SetText(solution, "Deleting tags");
+                    UpdateTags(solution, templateStory, teamStories, (_, item) => RemoveTags(solution, item, tags));
                     SetText(solution, "Tags Deletion Complete.");
                 }
 
-
-                _stories = new Dictionary<string, Story>();
-                _stories.Add(templateStory.Id, templateStory);
-
-                // assign new tags
-                foreach (var ts in teamStories)
-                {
-                    if (ts.Id.ToLower() != solution.TemplateId.ToLower())
-                    {
-                        if (!_stories.ContainsKey(ts.Id))
-                        {
-                            LoadStoryAndCheckPerms(solution, ts.Id, ts.Name);
-                        }
-                        story = _stories[ts.Id];
-
-                        foreach (var i in story.Items)
-                        {
-                            UpdateItem(solution, i, tags[story.Id]);
-                        }
-                    }
-                }
-
-                foreach (var s in _stories)
-                {
-                    if (s.Value != null)
-                    {
-                        SetText(solution, $"Saving '{s.Value.Name}'");
-                        s.Value.Save();
-                    }
-                }
+                UpdateTags(solution, templateStory, teamStories, (storyId, item) => UpdateItem(solution, item, tags[storyId]));
                 SetText(solution, "Complete.");
 
             }
@@ -150,6 +84,46 @@ namespace SCEnterpriseStoryTags.Services
                 SetText(solution, "There was an error.");
                 SetText(solution, $"'{ex.Message}'.");
                 SetText(solution, $"'{ex.StackTrace}'.");
+            }
+        }
+
+        private void UpdateTags(EnterpriseSolution solution, Story templateStory, StoryLite[] teamStories, Action<string, Item> update)
+        {
+            _stories = new Dictionary<string, Story>
+            {
+                {templateStory.Id, templateStory}
+            };
+
+            foreach (var ts in teamStories)
+            {
+                if (string.Equals(ts.Id, solution.TemplateId, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (!_stories.ContainsKey(ts.Id))
+                {
+                    LoadStoryAndCheckPerms(solution, ts.Id, ts.Name);
+                }
+
+                var story = _stories[ts.Id];
+
+                if (story != null)
+                {
+                    foreach (var i in story.Items)
+                    {
+                        update(story.Id, i);
+                    }
+                }
+            }
+
+            foreach (var s in _stories)
+            {
+                if (s.Value != null)
+                {
+                    SetText(solution, $"Saving '{s.Value.Name}'");
+                    s.Value.Save();
+                }
             }
         }
 

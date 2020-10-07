@@ -32,8 +32,7 @@ namespace SCEnterpriseStoryTags.Services
                 _sc = new SharpCloudApi(solution.Username, _passwordService.LoadPassword(solution), solution.Url);
                 var templateStory = _sc.LoadStory(solution.TemplateId);
                 SetText(solution, $"Template '{templateStory.Name}' Loaded.");
-
-                var tags = new Dictionary<string, ItemTag>();
+                
                 // check the story tags exist in the template
                 var teamStories = !solution.IsDirectory ? _sc.StoriesTeam(solution.Team) : _sc.StoriesDirectory(solution.Team);
 
@@ -47,26 +46,7 @@ namespace SCEnterpriseStoryTags.Services
                     return;
                 }
 
-                foreach (var ts in teamStories)
-                {
-                    if (ts.Id.ToLower() != solution.TemplateId.ToLower())
-                    {
-                        var tag = templateStory.ItemTag_FindByName(ts.Name);
-                        var description = $"Created automatically [{DateTime.Now}]";
-                        if (tag == null)
-                        {
-                            SetText(solution, $"Tag '{ts.Name}' created.");
-                            tag = templateStory.ItemTag_AddNew(ts.Name, description, TagGroup);
-                        }
-                        else
-                        {
-                            tag.Description = description;
-                        }
-                        tags.Add(ts.Id, tag);
-                    }
-                }
-                templateStory.Save();
-                SetText(solution, $"'{templateStory.Name}' saved.");
+                var tags = CreateTagsInTemplateStory(solution, teamStories, templateStory);
 
                 if (solution.RemoveOldTags)
                 {
@@ -85,6 +65,36 @@ namespace SCEnterpriseStoryTags.Services
                 SetText(solution, $"'{ex.Message}'.");
                 SetText(solution, $"'{ex.StackTrace}'.");
             }
+        }
+
+        private Dictionary<string, ItemTag> CreateTagsInTemplateStory(EnterpriseSolution solution, StoryLite[] teamStories, Story templateStory)
+        {
+            var tags = new Dictionary<string, ItemTag>();
+            foreach (var ts in teamStories)
+            {
+                if (string.Equals(ts.Id, solution.TemplateId, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    continue;
+                }
+
+                var tag = templateStory.ItemTag_FindByName(ts.Name);
+                var description = $"Created automatically [{DateTime.Now}]";
+                if (tag == null)
+                {
+                    SetText(solution, $"Tag '{ts.Name}' created.");
+                    tag = templateStory.ItemTag_AddNew(ts.Name, description, TagGroup);
+                }
+                else
+                {
+                    tag.Description = description;
+                }
+
+                tags.Add(ts.Id, tag);
+            }
+
+            templateStory.Save();
+            SetText(solution, $"'{templateStory.Name}' saved.");
+            return tags;
         }
 
         private void UpdateTags(EnterpriseSolution solution, Story templateStory, StoryLite[] teamStories, Action<string, Item> update)

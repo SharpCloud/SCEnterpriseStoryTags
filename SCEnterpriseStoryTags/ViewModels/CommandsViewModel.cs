@@ -1,17 +1,21 @@
-﻿using System.Threading.Tasks;
-using SCEnterpriseStoryTags.Commands;
+﻿using SCEnterpriseStoryTags.Commands;
 using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SCEnterpriseStoryTags.ViewModels
 {
     public class CommandsViewModel : ICommandsViewModel
     {
         public ActionCommand<object> AddSolution { get; }
-        public ActionCommand<EnterpriseSolution> CopySolution { get; }
-        public ActionCommand<EnterpriseSolution> MoveSolutionDown { get; }
-        public ActionCommand<EnterpriseSolution> MoveSolutionUp { get; }
-        public ActionCommand<EnterpriseSolution> RemoveSolution { get; }
+        public ActionCommand<IList> CopySolution { get; }
+        public ActionCommand<IList> MoveSolutionDown { get; }
+        public ActionCommand<IList> MoveSolutionUp { get; }
+        public ActionCommand<IList> RemoveSolution { get; }
         public ActionCommand<string> SetSolutionUrl { get; }
         public ActionCommand<object> ValidateAndRun { get; }
         public GoToUrl GoToUrl { get; } = new GoToUrl();
@@ -23,11 +27,23 @@ namespace SCEnterpriseStoryTags.ViewModels
                 mainViewModel.AddNewSolution();
             });
 
-            CopySolution = new ActionCommand<EnterpriseSolution>(
-                mainViewModel.CopySolution);
+            CopySolution = new ActionCommand<IList>(selected =>
+            {
+                BatchRun(
+                    mainViewModel.CopySolution,
+                    mainViewModel.Solutions,
+                    selected,
+                    false);
+            });
 
-            RemoveSolution = new ActionCommand<EnterpriseSolution>(
-                mainViewModel.RemoveSolution);
+            RemoveSolution = new ActionCommand<IList>(selected =>
+            {
+                BatchRun(
+                    mainViewModel.RemoveSolution,
+                    mainViewModel.Solutions,
+                    selected,
+                    false);
+            });
 
             SetSolutionUrl = new ActionCommand<string>(url =>
             {
@@ -39,11 +55,39 @@ namespace SCEnterpriseStoryTags.ViewModels
                 await Task.Run(() => ViewModelLocator.MainViewModel.ValidateAndRun());
             });
 
-            MoveSolutionDown = new ActionCommand<EnterpriseSolution>(
-                mainViewModel.MoveSolutionDown);
-            
-            MoveSolutionUp = new ActionCommand<EnterpriseSolution>(
-                mainViewModel.MoveSolutionUp);
+            MoveSolutionDown = new ActionCommand<IList>(selected =>
+            {
+                BatchRun(
+                    mainViewModel.MoveSolutionDown,
+                    mainViewModel.Solutions,
+                    selected,
+                    true);
+            });
+
+            MoveSolutionUp = new ActionCommand<IList>(selected =>
+            {
+                BatchRun(
+                    mainViewModel.MoveSolutionUp,
+                    mainViewModel.Solutions,
+                    selected,
+                    false);
+            });
+        }
+
+        private static void BatchRun(
+            Action<EnterpriseSolution> action,
+            IEnumerable<EnterpriseSolution> solutions,
+            IEnumerable selected,
+            bool reverseOrder)
+        {
+            var toMatch = new HashSet<EnterpriseSolution>(selected.Cast<EnterpriseSolution>());
+            var matches = solutions.Where(s => toMatch.Contains(s));
+            var collection = (reverseOrder ? matches.Reverse() : matches).ToArray();
+
+            foreach (var solution in collection)
+            {
+                action(solution);
+            }
         }
     }
 }

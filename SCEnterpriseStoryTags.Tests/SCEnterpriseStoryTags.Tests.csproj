@@ -64,6 +64,7 @@
   <ItemGroup>
     <Compile Include="Services\PasswordServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\CommandsViewModelTests.cs" />
     <Compile Include="ViewModels\ViewModelTests.cs" />
   </ItemGroup>
   <ItemGroup>

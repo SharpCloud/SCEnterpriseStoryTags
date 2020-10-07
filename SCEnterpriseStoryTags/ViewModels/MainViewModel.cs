@@ -20,17 +20,15 @@ namespace SCEnterpriseStoryTags.ViewModels
     public class MainViewModel : IMainViewModel
     {
         private const string ConfigFile = "SCEnterpriseStoryTags.json";
-        private const string TagGroup = "UsedInStories";
 
         private readonly IPasswordService _passwordService;
+        private readonly IUpdateService _updateService;
 
         private int _selectedTabIndex;
         private bool _isIdle = true;
         private EnterpriseSolution _selectedSolution;
-        private Dictionary<string, Story> _stories;
         private ObservableCollection<EnterpriseSolution> _solutions;
-        private SharpCloudApi _sc;
-
+        
         public Dictionary<FormFields, Action> FormFieldFocusActions { get; set; } = new Dictionary<FormFields, Action>();
 
         public string AppName { get; }
@@ -91,9 +89,12 @@ namespace SCEnterpriseStoryTags.ViewModels
             }
         }
 
-        public MainViewModel(IPasswordService passwordService)
+        public MainViewModel(
+            IPasswordService passwordService,
+            IUpdateService updateService)
         {
             _passwordService = passwordService;
+            _updateService = updateService;
             AppName = GetAppName();
         }
 
@@ -182,216 +183,10 @@ namespace SCEnterpriseStoryTags.ViewModels
                 MessageBox.Show(IsValidText());
                 return;
             }
-            DoIt();
-        }
 
-        private void DoIt()
-        {
-            try
-            {
-                IsIdle = false;
-
-                _sc = new SharpCloudApi(SelectedSolution.Username, _passwordService.LoadPassword(SelectedSolution), SelectedSolution.Url);
-
-                SelectedSolution.Status = string.Empty;
-
-                SetText("Reading template...");
-
-                var templateStory = _sc.LoadStory(SelectedSolution.TemplateId);
-
-                SetText($"Template '{templateStory.Name}' Loaded.");
-
-                var tags = new Dictionary<string, ItemTag>();
-                // check the story tags exist in the template
-                var teamStories = !SelectedSolution.IsDirectory ? _sc.StoriesTeam(SelectedSolution.Team) : _sc.StoriesDirectory(SelectedSolution.Team);
-
-                if (teamStories == null)
-                {
-                    SetText(!SelectedSolution.IsDirectory
-                        ? $"Oops... Looks like your team does not exist"
-                        : $"Oops... Looks like your directory does not exist");
-
-                    SetText($"Aborting process");
-                    goto End;
-                }
-
-                foreach (var ts in teamStories)
-                {
-                    if (ts.Id.ToLower() != SelectedSolution.TemplateId.ToLower())
-                    {
-                        var tag = templateStory.ItemTag_FindByName(ts.Name);
-                        var description = $"Created automatically [{DateTime.Now}]";
-                        if (tag == null)
-                        {
-                            SetText($"Tag '{ts.Name}' created.");
-                            tag = templateStory.ItemTag_AddNew(ts.Name, description, TagGroup);
-                        }
-                        else
-                        {
-                            tag.Description = description;
-                        }
-                        tags.Add(ts.Id, tag);
-                    }
-                }
-                templateStory.Save();
-                SetText($"'{templateStory.Name}' saved.");
-
-
-                Story story;
-
-                // remove any existing tags
-                if (SelectedSolution.RemoveOldTags)
-                {
-                    SetText($"Deleting tags");
-
-                    _stories = new Dictionary<string, Story>();
-                    _stories.Add(templateStory.Id, templateStory);
-
-                    foreach (var ts in teamStories)
-                    {
-                        if (ts.Id.ToLower() != SelectedSolution.TemplateId.ToLower())
-                        {
-                            if (!_stories.ContainsKey(ts.Id))
-                            {
-                                LoadStoryAndCheckPerms(ts.Id, ts.Name);
-                            }
-                            story = _stories[ts.Id];
-
-                            if (story != null)
-                            {
-                                foreach (var i in story.Items)
-                                {
-                                    RemoveTags(i, tags);
-                                }
-                            }
-                        }
-                    }
-
-                    // save
-                    foreach (var s in _stories)
-                    {
-                        SetText($"Saving '{s.Value.Name}'");
-                        s.Value.Save();
-                    }
-                    
-                    SetText($"Tags Deletion Complete.");
-                }
-
-
-                _stories = new Dictionary<string, Story>();
-                _stories.Add(templateStory.Id, templateStory);
-
-                // assign new tags
-                foreach (var ts in teamStories)
-                {
-                    if (ts.Id.ToLower() != SelectedSolution.TemplateId.ToLower())
-                    {
-                        if (!_stories.ContainsKey(ts.Id))
-                        {
-                            LoadStoryAndCheckPerms(ts.Id, ts.Name);
-                        }
-                        story = _stories[ts.Id];
-
-                        foreach (var i in story.Items)
-                        {
-                            UpdateItem(i, tags[story.Id]);
-                        }
-                    }
-                }
-
-                foreach (var s in _stories)
-                {
-                    if (s.Value != null)
-                    {
-                        SetText($"Saving '{s.Value.Name}'");
-                        s.Value.Save();
-                    }
-                }
-                SetText("Complete.");
-
-            }
-            catch (Exception ex)
-            {
-                SetText($"There was an error.");
-                SetText($"'{ex.Message}'.");
-                SetText($"'{ex.StackTrace}'.");
-            }
-
-        End:
+            IsIdle = false;
+            _updateService.UpdateStories(SelectedSolution);
             IsIdle = true;
-        }
-
-        private void RemoveTags(Item item, Dictionary<string, ItemTag> tags)
-        {
-            // check we have the owning story
-            if (!_stories.ContainsKey(item.StoryId))
-            {
-                SetText($"Loading external story...");
-                LoadStoryAndCheckPerms(item.StoryId, item.StoryId);
-            }
-            var story = _stories[item.StoryId];
-
-            var sourceItem = story.Item_FindById(item.Id);
-            foreach (var t in tags)
-            {
-                try
-                {
-                    sourceItem.Tag_DeleteById(t.Value.Id);
-                }
-                catch (Exception)
-                {
-
-                }
-            }
-        }
-
-        private void UpdateItem(Item item, ItemTag storyTag)
-        {
-            // check we have the owning story
-            if (!_stories.ContainsKey(item.StoryId))
-            {
-                SetText("Loading external story...");
-                LoadStoryAndCheckPerms(item.StoryId, item.StoryId);
-            }
-            var story = _stories[item.StoryId];
-
-            var sourceItem = story.Item_FindById(item.Id);
-            sourceItem.Tag_AddNew(storyTag);
-
-        }
-
-        private void SetText(string text)
-        {
-            text += "\n";
-            SelectedSolution.Status += text;
-        }
-
-        private void LoadStoryAndCheckPerms(string id, string name)
-        {
-            try
-            {
-                var story = _sc.LoadStory(id);
-
-                var perms = story.StoryAsRoadmap.GetPermission(SelectedSolution.Username);
-
-                if (perms != ShareAction.owner && perms != ShareAction.admin)
-                {
-                    SetText($"WARNING: You don't have admin permission on story '{name}'");
-                    SetText($"SKIPPING... '{name}'");
-                    _stories.Add(id, null);
-                }
-                else
-                {
-                    _stories.Add(id, story);
-                    SetText($"Loaded '{story.Name}'");
-                }
-
-            }
-            catch (Exception)
-            {
-                SetText($"WARNING: there was a problem loading '{name}'");
-                _stories.Add(id, null);
-            }
         }
 
         public void SaveValues()

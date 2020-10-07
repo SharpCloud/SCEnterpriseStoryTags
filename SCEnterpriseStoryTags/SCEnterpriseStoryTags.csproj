@@ -124,11 +124,13 @@
     <Compile Include="Interfaces\IMainViewModel.cs" />
     <Compile Include="Interfaces\IPasswordService.cs" />
     <Compile Include="Interfaces\IRegistryService.cs" />
+    <Compile Include="Interfaces\IUpdateService.cs" />
     <Compile Include="Models\EnterpriseSolution.cs" />
     <Compile Include="Models\FormFields.cs" />
     <Compile Include="Models\SaveData.cs" />
     <Compile Include="Services\IOService.cs" />
     <Compile Include="Services\PasswordService.cs" />
+    <Compile Include="Services\UpdateService.cs" />
     <Compile Include="ViewModels\CommandsViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelLocator.cs" />

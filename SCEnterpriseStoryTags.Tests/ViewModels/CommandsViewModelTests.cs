@@ -19,7 +19,9 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
             var solutionC = new EnterpriseSolution();
 
-            var mvm = new MainViewModel(Mock.Of<IPasswordService>())
+            var mvm = new MainViewModel(
+                Mock.Of<IPasswordService>(),
+                Mock.Of<IUpdateService>())
             {
                 Solutions = new ObservableCollection<EnterpriseSolution>
                 {
@@ -55,7 +57,9 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
             var solutionC = new EnterpriseSolution();
 
-            var mvm = new MainViewModel(Mock.Of<IPasswordService>())
+            var mvm = new MainViewModel(
+                Mock.Of<IPasswordService>(),
+                Mock.Of<IUpdateService>())
             {
                 Solutions = new ObservableCollection<EnterpriseSolution>
                 {
@@ -91,7 +95,9 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
             var solutionC = new EnterpriseSolution();
 
-            var mvm = new MainViewModel(Mock.Of<IPasswordService>())
+            var mvm = new MainViewModel(
+                Mock.Of<IPasswordService>(),
+                Mock.Of<IUpdateService>())
             {
                 Solutions = new ObservableCollection<EnterpriseSolution>
                 {
@@ -132,7 +138,9 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
                 Name = "Solution B"
             };
 
-            var mvm = new MainViewModel(Mock.Of<IPasswordService>())
+            var mvm = new MainViewModel(
+                Mock.Of<IPasswordService>(),
+                Mock.Of<IUpdateService>())
             {
                 Solutions = new ObservableCollection<EnterpriseSolution>
                 {

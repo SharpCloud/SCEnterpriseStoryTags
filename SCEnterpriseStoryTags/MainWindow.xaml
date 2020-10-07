@@ -232,7 +232,7 @@
                         <StackPanel Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
                             <CheckBox Foreground="{StaticResource TextBlue}"
                                       HorizontalAlignment="Center"
-                                      IsChecked="{Binding RemoveOldTags, Mode=TwoWay}"
+                                      IsChecked="{Binding SelectedSolution.RemoveOldTags, Mode=TwoWay}"
                                       VerticalAlignment="Center"
                                       VerticalContentAlignment="Center">
                                 Remove old tags
@@ -257,7 +257,7 @@
                              Grid.Row="1"
                              IsReadOnly="True"
                              Margin="10"
-                             Text="{Binding Status}"
+                             Text="{Binding SelectedSolution.Status}"
                              VerticalScrollBarVisibility="Visible">
                     </TextBox>
                 </Grid>

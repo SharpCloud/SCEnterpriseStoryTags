@@ -6,7 +6,9 @@ namespace SCEnterpriseStoryTags.Models
     public class EnterpriseSolution : INotifyPropertyChanged
     {
         private bool _isDirectory;
+        private bool _removeOldTags;
         private string _name;
+        private string _status;
         private string _team;
         private string _templateId;
         private string _url;
@@ -21,6 +23,20 @@ namespace SCEnterpriseStoryTags.Models
                 if (_isDirectory != value)
                 {
                     _isDirectory = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool RemoveOldTags
+        {
+            get => _removeOldTags;
+
+            set
+            {
+                if (_removeOldTags != value)
+                {
+                    _removeOldTags = value;
                     OnPropertyChanged();
                 }
             }
@@ -42,6 +58,20 @@ namespace SCEnterpriseStoryTags.Models
 
         public string Password { get; set; }
         public string PasswordEntropy { get; set; }
+
+        public string Status
+        {
+            get => _status;
+
+            set
+            {
+                if (_status != value)
+                {
+                    _status = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public string Team
         {

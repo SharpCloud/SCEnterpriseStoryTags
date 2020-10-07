@@ -10,9 +10,7 @@ namespace SCEnterpriseStoryTags.Interfaces
     {
         Dictionary<FormFields, Action> FormFieldFocusActions { get; set; }
         string AppName { get; }
-        bool RemoveOldTags { get; set; }
         int SelectedTabIndex { get; set; }
-        string Status { get; set; }
         bool IsIdle { get; }
         EnterpriseSolution SelectedSolution { get; set; }
         ObservableCollection<EnterpriseSolution> Solutions { get; set; }

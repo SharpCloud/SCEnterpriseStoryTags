@@ -24,9 +24,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         private readonly IPasswordService _passwordService;
 
-        private bool _removeOldTags;
         private int _selectedTabIndex;
-        private string _status;
         private bool _isIdle = true;
         private EnterpriseSolution _selectedSolution;
         private Dictionary<string, Story> _stories;
@@ -37,20 +35,6 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         public string AppName { get; }
 
-        public bool RemoveOldTags
-        {
-            get => _removeOldTags;
-
-            set
-            {
-                if (_removeOldTags != value)
-                {
-                    _removeOldTags = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
         public int SelectedTabIndex
         {
             get => _selectedTabIndex;
@@ -60,20 +44,6 @@ namespace SCEnterpriseStoryTags.ViewModels
                 if (_selectedTabIndex != value)
                 {
                     _selectedTabIndex = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string Status
-        {
-            get => _status;
-
-            set
-            {
-                if (_status != value)
-                {
-                    _status = value;
                     OnPropertyChanged();
                 }
             }
@@ -223,7 +193,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
                 _sc = new SharpCloudApi(SelectedSolution.Username, _passwordService.LoadPassword(SelectedSolution), SelectedSolution.Url);
 
-                Status = string.Empty;
+                SelectedSolution.Status = string.Empty;
 
                 SetText("Reading template...");
 
@@ -270,7 +240,7 @@ namespace SCEnterpriseStoryTags.ViewModels
                 Story story;
 
                 // remove any existing tags
-                if (RemoveOldTags)
+                if (SelectedSolution.RemoveOldTags)
                 {
                     SetText($"Deleting tags");
 
@@ -393,7 +363,7 @@ namespace SCEnterpriseStoryTags.ViewModels
         private void SetText(string text)
         {
             text += "\n";
-            Status += text;
+            SelectedSolution.Status += text;
         }
 
         private void LoadStoryAndCheckPerms(string id, string name)

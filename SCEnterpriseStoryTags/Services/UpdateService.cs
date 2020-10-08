@@ -27,22 +27,22 @@ namespace SCEnterpriseStoryTags.Services
             try
             {
                 solution.Status = string.Empty;
-                SetText(solution, "Reading template...");
+                solution.AppendToStatus("Reading template...");
 
                 _sc = new SharpCloudApi(solution.Username, _passwordService.LoadPassword(solution), solution.Url);
                 var templateStory = _sc.LoadStory(solution.TemplateId);
-                SetText(solution, $"Template '{templateStory.Name}' Loaded.");
+                solution.AppendToStatus($"Template '{templateStory.Name}' Loaded.");
                 
                 // check the story tags exist in the template
                 var teamStories = !solution.IsDirectory ? _sc.StoriesTeam(solution.Team) : _sc.StoriesDirectory(solution.Team);
 
                 if (teamStories == null)
                 {
-                    SetText(solution, !solution.IsDirectory
+                    solution.AppendToStatus(!solution.IsDirectory
                         ? "Oops... Looks like your team does not exist"
                         : "Oops... Looks like your directory does not exist");
 
-                    SetText(solution, "Aborting process");
+                    solution.AppendToStatus("Aborting process");
                     return;
                 }
 
@@ -50,20 +50,20 @@ namespace SCEnterpriseStoryTags.Services
 
                 if (solution.RemoveOldTags)
                 {
-                    SetText(solution, "Deleting tags");
+                    solution.AppendToStatus("Deleting tags");
                     UpdateTags(solution, templateStory, teamStories, (_, item) => RemoveTags(solution, item, tags));
-                    SetText(solution, "Tags Deletion Complete.");
+                    solution.AppendToStatus("Tags Deletion Complete.");
                 }
 
                 UpdateTags(solution, templateStory, teamStories, (storyId, item) => UpdateItem(solution, item, tags[storyId]));
-                SetText(solution, "Complete.");
+                solution.AppendToStatus("Complete.");
 
             }
             catch (Exception ex)
             {
-                SetText(solution, "There was an error.");
-                SetText(solution, $"'{ex.Message}'.");
-                SetText(solution, $"'{ex.StackTrace}'.");
+                solution.AppendToStatus("There was an error.");
+                solution.AppendToStatus($"'{ex.Message}'.");
+                solution.AppendToStatus($"'{ex.StackTrace}'.");
             }
         }
 
@@ -81,7 +81,7 @@ namespace SCEnterpriseStoryTags.Services
                 var description = $"Created automatically [{DateTime.Now}]";
                 if (tag == null)
                 {
-                    SetText(solution, $"Tag '{ts.Name}' created.");
+                    solution.AppendToStatus($"Tag '{ts.Name}' created.");
                     tag = templateStory.ItemTag_AddNew(ts.Name, description, TagGroup);
                 }
                 else
@@ -93,7 +93,7 @@ namespace SCEnterpriseStoryTags.Services
             }
 
             templateStory.Save();
-            SetText(solution, $"'{templateStory.Name}' saved.");
+            solution.AppendToStatus($"'{templateStory.Name}' saved.");
             return tags;
         }
 
@@ -131,7 +131,7 @@ namespace SCEnterpriseStoryTags.Services
             {
                 if (s.Value != null)
                 {
-                    SetText(solution, $"Saving '{s.Value.Name}'");
+                    solution.AppendToStatus($"Saving '{s.Value.Name}'");
                     s.Value.Save();
                 }
             }
@@ -142,7 +142,7 @@ namespace SCEnterpriseStoryTags.Services
             // check we have the owning story
             if (!_stories.ContainsKey(item.StoryId))
             {
-                SetText(solution, "Loading external story...");
+                solution.AppendToStatus("Loading external story...");
                 LoadStoryAndCheckPerms(solution, item.StoryId, item.StoryId);
             }
             var story = _stories[item.StoryId];
@@ -166,19 +166,13 @@ namespace SCEnterpriseStoryTags.Services
             // check we have the owning story
             if (!_stories.ContainsKey(item.StoryId))
             {
-                SetText(solution, "Loading external story...");
+                solution.AppendToStatus("Loading external story...");
                 LoadStoryAndCheckPerms(solution, item.StoryId, item.StoryId);
             }
             var story = _stories[item.StoryId];
 
             var sourceItem = story.Item_FindById(item.Id);
             sourceItem.Tag_AddNew(storyTag);
-        }
-
-        private void SetText(EnterpriseSolution solution, string text)
-        {
-            text += "\n";
-            solution.Status += text;
         }
 
         private void LoadStoryAndCheckPerms(EnterpriseSolution solution, string id, string name)
@@ -191,20 +185,20 @@ namespace SCEnterpriseStoryTags.Services
 
                 if (perms != ShareAction.owner && perms != ShareAction.admin)
                 {
-                    SetText(solution, $"WARNING: You don't have admin permission on story '{name}'");
-                    SetText(solution, $"SKIPPING... '{name}'");
+                    solution.AppendToStatus($"WARNING: You don't have admin permission on story '{name}'");
+                    solution.AppendToStatus($"SKIPPING... '{name}'");
                     _stories.Add(id, null);
                 }
                 else
                 {
                     _stories.Add(id, story);
-                    SetText(solution, $"Loaded '{story.Name}'");
+                    solution.AppendToStatus($"Loaded '{story.Name}'");
                 }
 
             }
             catch (Exception)
             {
-                SetText(solution, $"WARNING: there was a problem loading '{name}'");
+                solution.AppendToStatus($"WARNING: there was a problem loading '{name}'");
                 _stories.Add(id, null);
             }
         }

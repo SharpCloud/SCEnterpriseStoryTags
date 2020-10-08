@@ -129,6 +129,11 @@ namespace SCEnterpriseStoryTags.Models
             }
         }
 
+        public void AppendToStatus(string text)
+        {
+            Status += $"{text}\n";
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

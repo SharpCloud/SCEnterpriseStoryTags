@@ -1,10 +1,9 @@
-﻿using SC.API.ComInterop;
-using SC.API.ComInterop.Models;
-using SC.Entities.Models;
+﻿using SC.API.ComInterop.Models;
 using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SCEnterpriseStoryTags.Services
 {
@@ -12,14 +11,11 @@ namespace SCEnterpriseStoryTags.Services
     {
         private const string TagGroup = "UsedInStories";
 
-        private readonly IPasswordService _passwordService;
+        private readonly IStoryRepository _storyRepository;
 
-        private Dictionary<string, Story> _stories;
-        private SharpCloudApi _sc;
-
-        public UpdateService(IPasswordService passwordService)
+        public UpdateService(IStoryRepository storyRepository)
         {
-            _passwordService = passwordService;
+            _storyRepository = storyRepository;
         }
 
         public void UpdateStories(EnterpriseSolution solution)
@@ -27,14 +23,12 @@ namespace SCEnterpriseStoryTags.Services
             try
             {
                 solution.Status = string.Empty;
-                solution.AppendToStatus("Reading template...");
 
-                _sc = new SharpCloudApi(solution.Username, _passwordService.LoadPassword(solution), solution.Url);
-                var templateStory = _sc.LoadStory(solution.TemplateId);
-                solution.AppendToStatus($"Template '{templateStory.Name}' Loaded.");
-                
+                _storyRepository.Reset();
+                var templateStoryCacheItem = _storyRepository.GetStory(solution, solution.TemplateId, "Reading template...");
+
                 // check the story tags exist in the template
-                var teamStories = !solution.IsDirectory ? _sc.StoriesTeam(solution.Team) : _sc.StoriesDirectory(solution.Team);
+                var teamStories = _storyRepository.LoadTeamStories(solution);
 
                 if (teamStories == null)
                 {
@@ -46,16 +40,18 @@ namespace SCEnterpriseStoryTags.Services
                     return;
                 }
 
-                var tags = CreateTagsInTemplateStory(solution, teamStories, templateStory);
+                var tags = CreateTagsInTemplateStory(solution, teamStories, templateStoryCacheItem.Story);
 
                 if (solution.RemoveOldTags)
                 {
                     solution.AppendToStatus("Deleting tags");
-                    UpdateTags(solution, templateStory, teamStories, (_, item) => RemoveTags(solution, item, tags));
+                    _storyRepository.ReinitialiseCache(templateStoryCacheItem);
+                    UpdateTags(solution, teamStories, (_, item) => RemoveTags(solution, item, tags));
                     solution.AppendToStatus("Tags Deletion Complete.");
                 }
 
-                UpdateTags(solution, templateStory, teamStories, (storyId, item) => UpdateItem(solution, item, tags[storyId]));
+                _storyRepository.ReinitialiseCache(templateStoryCacheItem);
+                UpdateTags(solution, teamStories, (storyId, item) => UpdateItem(solution, item, tags[storyId]));
                 solution.AppendToStatus("Complete.");
 
             }
@@ -97,13 +93,8 @@ namespace SCEnterpriseStoryTags.Services
             return tags;
         }
 
-        private void UpdateTags(EnterpriseSolution solution, Story templateStory, StoryLite[] teamStories, Action<string, Item> update)
+        private void UpdateTags(EnterpriseSolution solution, StoryLite[] teamStories, Action<string, Item> update)
         {
-            _stories = new Dictionary<string, Story>
-            {
-                {templateStory.Id, templateStory}
-            };
-
             foreach (var ts in teamStories)
             {
                 if (string.Equals(ts.Id, solution.TemplateId, StringComparison.CurrentCultureIgnoreCase))
@@ -111,28 +102,26 @@ namespace SCEnterpriseStoryTags.Services
                     continue;
                 }
 
-                if (!_stories.ContainsKey(ts.Id))
+                var storyCacheItem = _storyRepository.GetStory(solution, ts.Id);
+                if (storyCacheItem.Story != null)
                 {
-                    LoadStoryAndCheckPerms(solution, ts.Id, ts.Name);
-                }
-
-                var story = _stories[ts.Id];
-
-                if (story != null)
-                {
-                    foreach (var i in story.Items)
+                    foreach (var i in storyCacheItem.Story.Items)
                     {
-                        update(story.Id, i);
+                        update(storyCacheItem.Story.Id, i);
                     }
                 }
             }
 
-            foreach (var s in _stories)
+            var toSave = _storyRepository.GetCachedStories()
+                .Where(s => s.IsAdmin)
+                .Select(s => s.Story);
+
+            foreach (var s in toSave)
             {
-                if (s.Value != null)
+                if (s != null)
                 {
-                    solution.AppendToStatus($"Saving '{s.Value.Name}'");
-                    s.Value.Save();
+                    solution.AppendToStatus($"Saving '{s.Name}'");
+                    s.Save();
                 }
             }
         }
@@ -140,14 +129,8 @@ namespace SCEnterpriseStoryTags.Services
         private void RemoveTags(EnterpriseSolution solution, Item item, Dictionary<string, ItemTag> tags)
         {
             // check we have the owning story
-            if (!_stories.ContainsKey(item.StoryId))
-            {
-                solution.AppendToStatus("Loading external story...");
-                LoadStoryAndCheckPerms(solution, item.StoryId, item.StoryId);
-            }
-            var story = _stories[item.StoryId];
-
-            var sourceItem = story.Item_FindById(item.Id);
+            var cacheItem = _storyRepository.GetStory(solution, item.StoryId, "Loading external story...");
+            var sourceItem = cacheItem.Story.Item_FindById(item.Id);
             foreach (var t in tags)
             {
                 try
@@ -156,7 +139,6 @@ namespace SCEnterpriseStoryTags.Services
                 }
                 catch (Exception)
                 {
-
                 }
             }
         }
@@ -164,43 +146,9 @@ namespace SCEnterpriseStoryTags.Services
         private void UpdateItem(EnterpriseSolution solution, Item item, ItemTag storyTag)
         {
             // check we have the owning story
-            if (!_stories.ContainsKey(item.StoryId))
-            {
-                solution.AppendToStatus("Loading external story...");
-                LoadStoryAndCheckPerms(solution, item.StoryId, item.StoryId);
-            }
-            var story = _stories[item.StoryId];
-
-            var sourceItem = story.Item_FindById(item.Id);
+            var cacheItem = _storyRepository.GetStory(solution, item.StoryId, "Loading external story...");
+            var sourceItem = cacheItem.Story.Item_FindById(item.Id);
             sourceItem.Tag_AddNew(storyTag);
-        }
-
-        private void LoadStoryAndCheckPerms(EnterpriseSolution solution, string id, string name)
-        {
-            try
-            {
-                var story = _sc.LoadStory(id);
-
-                var perms = story.StoryAsRoadmap.GetPermission(solution.Username);
-
-                if (perms != ShareAction.owner && perms != ShareAction.admin)
-                {
-                    solution.AppendToStatus($"WARNING: You don't have admin permission on story '{name}'");
-                    solution.AppendToStatus($"SKIPPING... '{name}'");
-                    _stories.Add(id, null);
-                }
-                else
-                {
-                    _stories.Add(id, story);
-                    solution.AppendToStatus($"Loaded '{story.Name}'");
-                }
-
-            }
-            catch (Exception)
-            {
-                solution.AppendToStatus($"WARNING: there was a problem loading '{name}'");
-                _stories.Add(id, null);
-            }
         }
     }
 }

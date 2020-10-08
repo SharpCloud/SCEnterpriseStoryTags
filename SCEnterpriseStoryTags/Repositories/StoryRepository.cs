@@ -37,6 +37,11 @@ namespace SCEnterpriseStoryTags.Repositories
             ReinitialiseCache();
         }
 
+        public void Save(Story story)
+        {
+            story.Save();
+        }
+
         public StoryLite[] LoadTeamStories(EnterpriseSolution solution)
         {
             var teamStories = !solution.IsDirectory

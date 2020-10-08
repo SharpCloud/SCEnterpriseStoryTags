@@ -7,6 +7,7 @@ namespace SCEnterpriseStoryTags.Interfaces
     {
         void ReinitialiseCache(params StoryRepositoryCacheEntry[] initialData);
         void Reset();
+        void Save(Story story);
         StoryLite[] LoadTeamStories(EnterpriseSolution solution);
         StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id);
         StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id, string loadingMessage);

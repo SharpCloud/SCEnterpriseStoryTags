@@ -16,6 +16,7 @@ namespace SCEnterpriseStoryTags
         public MainWindow()
         {
             InitializeComponent();
+            ViewModelLocator.MessageService.Owner = this;
             ViewModelLocator.MainViewModel.PropertyChanged += MainViewModelPropertyChanged;
 
             ViewModelLocator.MainViewModel.FormFieldFocusActions = new Dictionary<FormFields, Action>

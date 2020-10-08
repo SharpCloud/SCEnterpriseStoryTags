@@ -122,6 +122,7 @@
     <Compile Include="Interfaces\IActionCommand.cs" />
     <Compile Include="Interfaces\ICommandsViewModel.cs" />
     <Compile Include="Interfaces\IMainViewModel.cs" />
+    <Compile Include="Interfaces\IMessageService.cs" />
     <Compile Include="Interfaces\IPasswordService.cs" />
     <Compile Include="Interfaces\IRegistryService.cs" />
     <Compile Include="Interfaces\IStoryRepository.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="Models\StoryRepositoryCacheEntry.cs" />
     <Compile Include="Repositories\StoryRepository.cs" />
     <Compile Include="Services\IOService.cs" />
+    <Compile Include="Services\MessageService.cs" />
     <Compile Include="Services\PasswordService.cs" />
     <Compile Include="Services\UpdateService.cs" />
     <Compile Include="ViewModels\CommandsViewModel.cs" />

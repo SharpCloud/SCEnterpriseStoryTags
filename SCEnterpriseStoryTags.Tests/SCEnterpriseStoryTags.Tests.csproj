@@ -51,6 +51,19 @@
     <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework" />
+    <Reference Include="SC.Api, Version=1.8.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCloud.ClientAPI.1.8.4\lib\SC.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="SC.API.ComInterop, Version=1.8.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCloud.ClientAPI.1.8.4\lib\SC.API.ComInterop.dll</HintPath>
+    </Reference>
+    <Reference Include="SC.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCloud.ClientAPI.1.8.4\lib\SC.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="SC.SharedModels, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCloud.ClientAPI.1.8.4\lib\SC.SharedModels.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -64,6 +77,7 @@
   <ItemGroup>
     <Compile Include="Services\PasswordServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\UpdateServiceTests.cs" />
     <Compile Include="ViewModels\CommandsViewModelTests.cs" />
     <Compile Include="ViewModels\ViewModelTests.cs" />
   </ItemGroup>

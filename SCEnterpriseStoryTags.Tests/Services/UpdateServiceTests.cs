@@ -67,8 +67,8 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 It.IsAny<string>(),
                 It.IsAny<MessageBoxButton>()), Times.Never);
 
-            Mock.Get(repository).Verify(r => r.Save(tStory), Times.Exactly(3));
-            Mock.Get(repository).Verify(r => r.Save(cStory), Times.Exactly(2));
+            Mock.Get(repository).Verify(r => r.Save(tStory), Times.Once);
+            Mock.Get(repository).Verify(r => r.Save(cStory), Times.Once);
         }
 
         [Test]

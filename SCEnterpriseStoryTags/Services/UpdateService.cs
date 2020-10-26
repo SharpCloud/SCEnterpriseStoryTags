@@ -47,14 +47,13 @@ namespace SCEnterpriseStoryTags.Services
 
                 var tags = CreateTagsInTemplateStory(solution, teamStories, templateStoryCacheItem.Story);
 
-                var updateApplied = false;
+                var applyUpdate = false;
                 if (solution.RemoveOldTags)
                 {
                     solution.AppendToStatus("Deleting tags");
-                    _storyRepository.ReinitialiseCache(templateStoryCacheItem);
-                    updateApplied = UpdateTags(solution, teamStories, (_, item) => RemoveTags(solution, item, tags), true);
+                    applyUpdate = UpdateTags(solution, teamStories, (_, item) => RemoveTags(solution, item, tags), true);
 
-                    if (!updateApplied)
+                    if (!applyUpdate)
                     {
                         solution.AppendToStatus("Aborting process due to cancellation by user");
                         return;
@@ -63,13 +62,20 @@ namespace SCEnterpriseStoryTags.Services
                     solution.AppendToStatus("Tags Deletion Complete.");
                 }
 
-                _storyRepository.ReinitialiseCache(templateStoryCacheItem);
                 UpdateTags(solution, teamStories, (storyId, item) => UpdateItem(solution, item, tags[storyId]), !solution.RemoveOldTags);
 
-                if (updateApplied)
+                if (applyUpdate)
                 {
-                    _storyRepository.Save(templateStoryCacheItem.Story);
-                    solution.AppendToStatus($"'{templateStoryCacheItem.Story.Name}' saved.");
+                    var toSave = _storyRepository.GetCachedStories()
+                        .Where(s => s.IsAdmin)
+                        .Select(s => s.Story)
+                        .Where(s => s != null);
+
+                    foreach (var s in toSave)
+                    {
+                        solution.AppendToStatus($"Saving '{s.Name}'");
+                        _storyRepository.Save(s);
+                    }
                 }
 
                 solution.AppendToStatus("Complete.");
@@ -153,22 +159,6 @@ namespace SCEnterpriseStoryTags.Services
             }
 
             var applyUpdate = result != MessageBoxResult.No;
-            if (applyUpdate)
-            {
-                var toSave = _storyRepository.GetCachedStories()
-                    .Where(s => s.IsAdmin)
-                    .Select(s => s.Story);
-
-                foreach (var s in toSave)
-                {
-                    if (s != null)
-                    {
-                        solution.AppendToStatus($"Saving '{s.Name}'");
-                        _storyRepository.Save(s);
-                    }
-                }
-            }
-
             return applyUpdate;
         }
 

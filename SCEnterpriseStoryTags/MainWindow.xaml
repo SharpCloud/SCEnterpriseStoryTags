@@ -219,46 +219,58 @@
             <TabItem Header="Process" >
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="100" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition  />
                     </Grid.RowDefinitions>
-                    <StackPanel VerticalAlignment="Center">
+                    
+                    <StackPanel Margin="10" VerticalAlignment="Center">
                         <Button Command="{Binding CommandsViewModel.ValidateAndRun, Source={StaticResource ViewModelLocator}}"
                                 Content="Do it"
                                 Height="40"
                                 Width="200"
                                 IsEnabled="{Binding IsIdle}" />
 
-                        <StackPanel Margin="5" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Margin="5" HorizontalAlignment="Center">
                             <CheckBox Foreground="{StaticResource TextBlue}"
-                                      HorizontalAlignment="Center"
-                                      IsChecked="{Binding SelectedSolution.RemoveOldTags, Mode=TwoWay}"
+                                      IsChecked="{Binding SelectedSolution.AllowOwnershipTransfer, Mode=TwoWay}"
+                                      Margin="0,0,0,5" 
                                       VerticalAlignment="Center"
                                       VerticalContentAlignment="Center">
-                                Remove old tags
+                                Automatically make me an admin on all stories
                             </CheckBox>
-                            <Image Height="20" Margin="10,0" Source="Images/Information.png">
-                                <Image.ToolTip>
-                                    <TextBlock>
-                                        Ticking this will clear the tag assignments only. The tag definitions (in the template story) will not be deleted.
-                                        <LineBreak />
-                                        Use this option if you have removed shared items from one or more stories, or if you are not entirely sure if items could have been removed.
-                                        <LineBreak />
-                                        Note that this option takes slightly longer to run.
-                                    </TextBlock>
-                                </Image.ToolTip>
-                            </Image>
+
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox Foreground="{StaticResource TextBlue}"
+                                          IsChecked="{Binding SelectedSolution.RemoveOldTags, Mode=TwoWay}"
+                                          VerticalAlignment="Center"
+                                          VerticalContentAlignment="Center">
+                                    Remove old tags
+                                </CheckBox>
+                                <Image Height="20" Margin="10,0" Source="Images/Information.png">
+                                    <Image.ToolTip>
+                                        <TextBlock>
+                                            Ticking this will clear the tag assignments only. The tag definitions (in the template story) will not be deleted.
+                                            <LineBreak />
+                                            Use this option if you have removed shared items from one or more stories, or if you are not entirely sure if items could have been removed.
+                                            <LineBreak />
+                                            Note that this option takes slightly longer to run.
+                                        </TextBlock>
+                                    </Image.ToolTip>
+                                </Image>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
+                    
                     <TextBox Background="{StaticResource AppBackground}"
                              FontFamily="Courier New"
                              FontSize="12"
                              Foreground="{StaticResource TextBlue}"
                              Grid.Row="1"
+                             HorizontalScrollBarVisibility="Auto"
                              IsReadOnly="True"
-                             Margin="10"
+                             Margin="10,0,10,10"
                              Text="{Binding SelectedSolution.Status}"
-                             VerticalScrollBarVisibility="Visible">
+                             VerticalScrollBarVisibility="Auto">
                     </TextBox>
                 </Grid>
             </TabItem>

@@ -1,7 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SC.API.ComInterop;
-using SC.API.ComInterop.Models;
-using SC.Entities.Models;
 using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
 using SCEnterpriseStoryTags.Services;
@@ -13,6 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace SCEnterpriseStoryTags.ViewModels
@@ -175,7 +173,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             return "OK";
         }
 
-        public void ValidateAndRun()
+        public async Task ValidateAndRun()
         {
             SaveValues();
             if (!IsValid())
@@ -185,7 +183,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             }
 
             IsIdle = false;
-            _updateService.UpdateStories(SelectedSolution);
+            await _updateService.UpdateStories(SelectedSolution);
             IsIdle = true;
         }
 

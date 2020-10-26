@@ -52,7 +52,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
             ValidateAndRun = new ActionCommand<object>(async arg =>
             {
-                await Task.Run(() => ViewModelLocator.MainViewModel.ValidateAndRun());
+                await Task.Run(async () => await ViewModelLocator.MainViewModel.ValidateAndRun());
             });
 
             MoveSolutionDown = new ActionCommand<IList>(selected =>

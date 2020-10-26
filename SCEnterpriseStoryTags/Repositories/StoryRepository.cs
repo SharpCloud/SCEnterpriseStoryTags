@@ -1,4 +1,7 @@
-﻿using SC.API.ComInterop;
+﻿using RestSharp;
+using RestSharp.Authenticators;
+using RestSharp.Serializers.NewtonsoftJson;
+using SC.API.ComInterop;
 using SC.API.ComInterop.Models;
 using SC.Entities.Models;
 using SCEnterpriseStoryTags.Interfaces;
@@ -6,6 +9,7 @@ using SCEnterpriseStoryTags.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SCEnterpriseStoryTags.Repositories
 {
@@ -21,25 +25,45 @@ namespace SCEnterpriseStoryTags.Repositories
             _passwordService = passwordService;
         }
 
-        public void ReinitialiseCache(params StoryRepositoryCacheEntry[] initialData)
-        {
-            _storyCache = new Dictionary<string, StoryRepositoryCacheEntry>();
-
-            foreach (var data in initialData)
-            {
-                _storyCache.Add(data.Story.Id, data);
-            }
-        }
-
         public void Reset()
         {
             _sc = null;
-            ReinitialiseCache();
+            _storyCache = new Dictionary<string, StoryRepositoryCacheEntry>();
         }
 
         public void Save(Story story)
         {
             story.Save();
+        }
+
+        public async Task<bool> TransferOwner(
+            EnterpriseSolution solution,
+            string newOwnerUsername,
+            Story story,
+            int postTransferDelay)
+        {
+            var client = new RestClient(solution.Url);
+            client.UseNewtonsoftJson();
+
+            client.Authenticator = new HttpBasicAuthenticator(
+                solution.Username,
+                _passwordService.LoadPassword(solution));
+
+            var request = new RestRequest($"stories/transfer/{newOwnerUsername}")
+                .AddJsonBody(story.StoryAsRoadmap);
+
+            var response = await client.ExecutePostAsync(request);
+
+            // Ownership isn't transferred immediately after the HTTP call returns. Add a
+            // delay if subsequent processing relies on ownership having been transferred.
+            await Task.Delay(postTransferDelay);
+
+            var message = response.IsSuccessful
+                ? $"Ownership of story '{story.Name}' has been transferred to {newOwnerUsername}"
+                : $"Ownership transfer failed: {response.StatusDescription} - {response.Content}";
+
+            solution.AppendToStatus(message);
+            return response.IsSuccessful;
         }
 
         public StoryLite[] LoadTeamStories(EnterpriseSolution solution)
@@ -53,11 +77,25 @@ namespace SCEnterpriseStoryTags.Repositories
 
         public StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id)
         {
-            return GetStory(solution, id, null);
+            return GetStory(solution, id, null, true);
         }
 
         public StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id, string loadingMessage)
         {
+            return GetStory(solution, id, loadingMessage, true);
+        }
+
+        public StoryRepositoryCacheEntry GetStory(
+            EnterpriseSolution solution,
+            string id,
+            string loadingMessage,
+            bool useCache)
+        {
+            if (!useCache && _storyCache.ContainsKey(id))
+            {
+                _storyCache.Remove(id);
+            }
+
             if (!_storyCache.ContainsKey(id))
             {
                 try

@@ -1,9 +1,10 @@
 ﻿using SCEnterpriseStoryTags.Models;
+using System.Threading.Tasks;
 
 namespace SCEnterpriseStoryTags.Interfaces
 {
     public interface IUpdateService
     {
-        void UpdateStories(EnterpriseSolution solution);
+        Task UpdateStories(EnterpriseSolution solution);
     }
 }

@@ -5,6 +5,7 @@ namespace SCEnterpriseStoryTags.Models
 {
     public class EnterpriseSolution : INotifyPropertyChanged
     {
+        private bool _allowOwnershipTransfer;
         private bool _isDirectory;
         private bool _removeOldTags;
         private string _name;
@@ -13,6 +14,20 @@ namespace SCEnterpriseStoryTags.Models
         private string _templateId;
         private string _url;
         private string _username;
+
+        public bool AllowOwnershipTransfer
+        {
+            get => _allowOwnershipTransfer;
+
+            set
+            {
+                if (_allowOwnershipTransfer != value)
+                {
+                    _allowOwnershipTransfer = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public bool IsDirectory
         {

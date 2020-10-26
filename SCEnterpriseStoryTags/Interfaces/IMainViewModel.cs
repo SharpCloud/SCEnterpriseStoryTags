@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace SCEnterpriseStoryTags.Interfaces
 {
@@ -22,6 +23,6 @@ namespace SCEnterpriseStoryTags.Interfaces
         void MoveSolutionUp(EnterpriseSolution solution);
         void RemoveSolution(EnterpriseSolution solution);
         void SaveValues();
-        void ValidateAndRun();
+        Task ValidateAndRun();
     }
 }

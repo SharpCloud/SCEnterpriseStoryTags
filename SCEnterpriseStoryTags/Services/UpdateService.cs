@@ -4,6 +4,7 @@ using SCEnterpriseStoryTags.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace SCEnterpriseStoryTags.Services
@@ -12,18 +13,21 @@ namespace SCEnterpriseStoryTags.Services
     {
         private const string TagGroup = "UsedInStories";
 
+        private readonly int _ownershipTransferDelay;
         private readonly IMessageService _messageService;
         private readonly IStoryRepository _storyRepository;
 
         public UpdateService(
+            int ownershipTransferDelay,
             IMessageService messageService,
             IStoryRepository storyRepository)
         {
+            _ownershipTransferDelay = ownershipTransferDelay;
             _messageService = messageService;
             _storyRepository = storyRepository;
         }
 
-        public void UpdateStories(EnterpriseSolution solution)
+        public async Task UpdateStories(EnterpriseSolution solution)
         {
             try
             {
@@ -51,7 +55,11 @@ namespace SCEnterpriseStoryTags.Services
                 if (solution.RemoveOldTags)
                 {
                     solution.AppendToStatus("Deleting tags");
-                    applyUpdate = UpdateTags(solution, teamStories, (_, item) => RemoveTags(solution, item, tags), true);
+                    applyUpdate = UpdateTags(
+                        solution,
+                        teamStories,
+                        (_, item) => RemoveTags(solution, item, tags),
+                        !solution.AllowOwnershipTransfer);
 
                     if (!applyUpdate)
                     {
@@ -62,19 +70,60 @@ namespace SCEnterpriseStoryTags.Services
                     solution.AppendToStatus("Tags Deletion Complete.");
                 }
 
-                UpdateTags(solution, teamStories, (storyId, item) => UpdateItem(solution, item, tags[storyId]), !solution.RemoveOldTags);
+                applyUpdate = UpdateTags(
+                    solution,
+                    teamStories,
+                    (storyId, item) => UpdateItem(solution, item, tags[storyId]),
+                    !solution.AllowOwnershipTransfer && !solution.RemoveOldTags);
 
                 if (applyUpdate)
                 {
-                    var toSave = _storyRepository.GetCachedStories()
-                        .Where(s => s.IsAdmin)
-                        .Select(s => s.Story)
-                        .Where(s => s != null);
+                    var storyIds = _storyRepository.GetCachedStories()
+                        .Select(e => e.Story)
+                        .Where(s => s != null)
+                        .Select(s => s.Id);
 
-                    foreach (var s in toSave)
+                    foreach (var id in storyIds)
                     {
-                        solution.AppendToStatus($"Saving '{s.Name}'");
-                        _storyRepository.Save(s);
+                        var cacheEntry = _storyRepository.GetStory(solution, id);
+                        var originalOwner = string.Empty;
+
+                        if (solution.AllowOwnershipTransfer && !cacheEntry.IsAdmin)
+                        {
+                            originalOwner = cacheEntry.Story.StoryAsRoadmap.Owner.Username;
+
+                            var success = await _storyRepository.TransferOwner(
+                                solution,
+                                solution.Username,
+                                cacheEntry.Story,
+                                _ownershipTransferDelay);
+
+                            if (!success)
+                            {
+                                continue;
+                            }
+
+                            cacheEntry = _storyRepository.GetStory(solution, id, null, false);
+                        }
+
+                        if (cacheEntry.IsAdmin)
+                        {
+                            solution.AppendToStatus($"Saving '{cacheEntry.Story.Name}'");
+                            _storyRepository.Save(cacheEntry.Story);
+                        }
+                        else
+                        {
+                            solution.AppendToStatus($"Story '{cacheEntry.Story.Name}' NOT saved");
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(originalOwner))
+                        {
+                            await _storyRepository.TransferOwner(
+                                solution,
+                                originalOwner,
+                                cacheEntry.Story,
+                                0);
+                        }
                     }
                 }
 

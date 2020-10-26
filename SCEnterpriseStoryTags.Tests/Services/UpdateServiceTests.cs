@@ -6,7 +6,9 @@ using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
 using SCEnterpriseStoryTags.Services;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
+using User = SC.Entities.Models.User;
 
 namespace SCEnterpriseStoryTags.Tests.Services
 {
@@ -33,7 +35,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
         }
 
         [Test]
-        public void AllStoriesAreSavedWhenAdminForAll()
+        public async Task AllStoriesAreSavedWhenAdminForAll()
         {
             // Arrange
             
@@ -49,16 +51,17 @@ namespace SCEnterpriseStoryTags.Tests.Services
             var messageService = Mock.Of<IMessageService>();
 
             var repository = Mock.Of<IStoryRepository>(r =>
+                r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry &&
                 r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
-            var service = new UpdateService(messageService, repository);
+            var service = new UpdateService(0, messageService, repository);
 
             // Act
 
-             service.UpdateStories(solution);
+             await service.UpdateStories(solution);
 
             // Assert
 
@@ -69,10 +72,16 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             Mock.Get(repository).Verify(r => r.Save(tStory), Times.Once);
             Mock.Get(repository).Verify(r => r.Save(cStory), Times.Once);
+            
+            Mock.Get(repository).Verify(r => r.TransferOwner(
+                It.IsAny<EnterpriseSolution>(),
+                It.IsAny<string>(),
+                It.IsAny<Story>(),
+                It.IsAny<int>()), Times.Never);
         }
 
         [Test]
-        public void NoStoriesAreSavedWhenNotAdminOfChildAndRemovingOldTagsAndProcessCancelledByUser()
+        public async Task NoStoriesAreSavedWhenNotAdminOfChildAndRemovingOldTagsAndProcessCancelledByUser()
         {
             // Arrange
 
@@ -94,11 +103,11 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.LoadTeamStories(solution) == new[] { tStoryLite, cStoryLite } &&
                 r.GetCachedStories() == new[] { tCacheEntry, cCacheEntry });
 
-            var service = new UpdateService(messageService, repository);
+            var service = new UpdateService(0, messageService, repository);
 
             // Act
 
-            service.UpdateStories(solution);
+            await service.UpdateStories(solution);
 
             // Assert
 
@@ -112,7 +121,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
         }
 
         [Test]
-        public void NoStoriesAreSavedWhenNotAdminOfChildAndNotRemovingOldTagsAndProcessCancelledByUser()
+        public async Task NoStoriesAreSavedWhenNotAdminOfChildAndNotRemovingOldTagsAndProcessCancelledByUser()
         {
             // Arrange
 
@@ -134,11 +143,11 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.LoadTeamStories(solution) == new[] { tStoryLite, cStoryLite } &&
                 r.GetCachedStories() == new[] { tCacheEntry, cCacheEntry });
 
-            var service = new UpdateService(messageService, repository);
+            var service = new UpdateService(0, messageService, repository);
 
             // Act
 
-            service.UpdateStories(solution);
+            await service.UpdateStories(solution);
 
             // Assert
 
@@ -149,6 +158,145 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             Mock.Get(repository).Verify(r => r.Save(tStory), Times.Never);
             Mock.Get(repository).Verify(r => r.Save(cStory), Times.Never);
+        }
+
+        [Test]
+        public async Task AllStoriesAreSavedWhenNotAdminOfChildAndNotRemovingOldTagsAndAllowingOwnershipTransfer()
+        {
+            // Arrange
+
+            const string originalStoryOwner = "OriginalStoryOwner";
+            const string solutionUsername = "SolutionUsername";
+
+            var (tStory, tStoryLite, tCacheEntry) = CreateStory(TemplateId, true);
+            var (cStory, cStoryLite, cCacheEntry) = CreateStory(ChildId, false);
+
+            cStory.StoryAsRoadmap.Owner = new User
+            {
+                Username = originalStoryOwner
+            };
+
+            var solution = new EnterpriseSolution
+            {
+                AllowOwnershipTransfer = true,
+                RemoveOldTags = false,
+                TemplateId = TemplateId,
+                Username = solutionUsername
+            };
+
+            var messageService = Mock.Of<IMessageService>();
+
+            var repository = Mock.Of<IStoryRepository>(r =>
+                r.GetStory(solution, TemplateId) == tCacheEntry &&
+                r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
+                r.GetStory(solution, ChildId) == cCacheEntry &&
+                r.LoadTeamStories(solution) == new[] { tStoryLite, cStoryLite } &&
+                r.GetCachedStories() == new[] { tCacheEntry, cCacheEntry });
+
+            Mock.Get(repository)
+                .Setup(r => r.TransferOwner(solution, It.IsAny<string>(), cStory, It.IsAny<int>()))
+                .ReturnsAsync<EnterpriseSolution, string, Story, int, IStoryRepository, bool>((e, o, s, d) =>
+                {
+                    cStory.StoryAsRoadmap.Owner.Username = o;
+                    return true;
+                });
+
+            Mock.Get(repository)
+                .Setup(r => r.GetStory(solution, ChildId, It.IsAny<string>(), false))
+                .Returns<EnterpriseSolution, string, string, bool>((e, id, msg, c) => new StoryRepositoryCacheEntry
+                {
+                    IsAdmin = cStory.StoryAsRoadmap.Owner.Username == solutionUsername,
+                    Story = cStory
+                });
+
+            var service = new UpdateService(0, messageService, repository);
+
+            // Act
+
+            await service.UpdateStories(solution);
+
+            // Assert
+
+            Mock.Get(messageService).Verify(s => s.Show(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<MessageBoxButton>()), Times.Never);
+
+            Mock.Get(repository).Verify(r => r.Save(tStory), Times.Once);
+            Mock.Get(repository).Verify(r => r.Save(cStory), Times.Once);
+
+            Mock.Get(repository).Verify(r =>
+                r.TransferOwner(solution, solutionUsername, cStory, It.IsAny<int>()), Times.Once);
+
+            Mock.Get(repository).Verify(r =>
+                r.TransferOwner(solution, originalStoryOwner, cStory, 0), Times.Once);
+        }
+
+        [Test]
+        public async Task ChildStoryNotSavedIfOwnershipTransferFails()
+        {
+            // Arrange
+
+            const string originalStoryOwner = "OriginalStoryOwner";
+            const string solutionUsername = "SolutionUsername";
+
+            var (tStory, tStoryLite, tCacheEntry) = CreateStory(TemplateId, true);
+            var (cStory, cStoryLite, cCacheEntry) = CreateStory(ChildId, false);
+
+            cStory.StoryAsRoadmap.Owner = new User
+            {
+                Username = originalStoryOwner
+            };
+
+            var solution = new EnterpriseSolution
+            {
+                AllowOwnershipTransfer = true,
+                RemoveOldTags = false,
+                TemplateId = TemplateId,
+                Username = solutionUsername
+            };
+
+            var messageService = Mock.Of<IMessageService>();
+
+            var repository = Mock.Of<IStoryRepository>(r =>
+                r.GetStory(solution, TemplateId) == tCacheEntry &&
+                r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
+                r.GetStory(solution, ChildId) == cCacheEntry &&
+                r.GetStory(solution, ChildId, It.IsAny<string>(), false) == cCacheEntry &&
+                r.LoadTeamStories(solution) == new[] { tStoryLite, cStoryLite } &&
+                r.GetCachedStories() == new[] { tCacheEntry, cCacheEntry });
+
+            Mock.Get(repository)
+                .Setup(r => r.TransferOwner(solution, It.IsAny<string>(), cStory, It.IsAny<int>()))
+                .ReturnsAsync<EnterpriseSolution, string, Story, int, IStoryRepository, bool>((e, o, s, d) => false);
+
+            var service = new UpdateService(0, messageService, repository);
+
+            // Act
+
+            await service.UpdateStories(solution);
+
+            // Assert
+
+            Mock.Get(messageService).Verify(s => s.Show(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<MessageBoxButton>()), Times.Never);
+
+            Mock.Get(repository).Verify(r => r.Save(tStory), Times.Once);
+            Mock.Get(repository).Verify(r => r.Save(cStory), Times.Never);
+
+            Mock.Get(repository).Verify(r => r.TransferOwner(
+                solution,
+                solutionUsername,
+                cStory,
+                It.IsAny<int>()), Times.Once);
+
+            Mock.Get(repository).Verify(r => r.TransferOwner(
+                It.IsAny<EnterpriseSolution>(),
+                originalStoryOwner,
+                It.IsAny<Story>(),
+                It.IsAny<int>()), Times.Never);
         }
     }
 }

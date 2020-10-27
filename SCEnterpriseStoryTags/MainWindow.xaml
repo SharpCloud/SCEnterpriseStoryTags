@@ -20,7 +20,7 @@
 
     <Grid Background="Black">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="320" MinWidth="80" />
+            <ColumnDefinition Width="280" MinWidth="80" />
             <ColumnDefinition Width="3" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
@@ -267,7 +267,7 @@
                     
                     <TextBox Background="{StaticResource AppBackground}"
                              FontFamily="Courier New"
-                             FontSize="12"
+                             FontSize="12.5"
                              Foreground="{StaticResource TextBlue}"
                              Grid.Row="1"
                              HorizontalScrollBarVisibility="Auto"

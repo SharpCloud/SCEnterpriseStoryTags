@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:SCEnterpriseStoryTags.ViewModels"
+        xmlns:converters="clr-namespace:SCEnterpriseStoryTags.Converters"
         mc:Ignorable="d"
         Background="{StaticResource AppBackground}"
         Closing="MainWindow_OnClosing"
@@ -13,6 +14,9 @@
         Title="{Binding AppName}"
         UseLayoutRounding="True"
         Width="1040">
+    <Window.Resources>
+        <converters:UrlToStoryIdConverter x:Key="UrlToStoryIdConverter" />
+    </Window.Resources>
 
     <Grid Background="Black">
         <Grid.ColumnDefinitions>
@@ -201,7 +205,7 @@
                     
                     <StackPanel Orientation="Horizontal">
                         <Label Content="Template ID:" />
-                        <TextBox x:Name="TemplateId" Text="{Binding SelectedSolution.TemplateId}" />
+                        <TextBox x:Name="TemplateId" Text="{Binding SelectedSolution.TemplateId, Converter={StaticResource UrlToStoryIdConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png">
                             <Image.ToolTip>
                                 <TextBlock>

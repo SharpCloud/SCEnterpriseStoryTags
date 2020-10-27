@@ -113,6 +113,8 @@ namespace SCEnterpriseStoryTags.Repositories
                         solution.AppendToStatus(loadingMessage);
                     }
 
+                    solution.AppendToStatus($"Loading story with ID: {id}");
+
                     var story = _sc.LoadStory(id);
                     var perms = story.StoryAsRoadmap.GetPermission(solution.Username);
 
@@ -121,15 +123,12 @@ namespace SCEnterpriseStoryTags.Repositories
                         IsAdmin = perms == ShareAction.owner || perms == ShareAction.admin,
                         Story = story
                     };
-
-                    if (entry.IsAdmin)
-                    {
-                        solution.AppendToStatus($"Loaded '{entry.Story.Name}'");
-                    }
-                    else
+                    
+                    solution.AppendToStatus($"Loaded '{entry.Story.Name}' (ID: {entry.Story.Id})");
+                    
+                    if (!entry.IsAdmin)
                     {
                         solution.AppendToStatus($"WARNING: You don't have admin permission on story '{entry.Story.Name}'");
-                        solution.AppendToStatus($"SKIPPING... '{entry.Story.Name}'");
                     }
 
                     _storyCache.Add(id, entry);

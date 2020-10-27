@@ -54,7 +54,7 @@ namespace SCEnterpriseStoryTags.Services
                 var applyUpdate = false;
                 if (solution.RemoveOldTags)
                 {
-                    solution.AppendToStatus("Deleting tags");
+                    solution.AppendToStatus("Removing tags...");
                     applyUpdate = UpdateTags(
                         solution,
                         teamStories,
@@ -67,14 +67,18 @@ namespace SCEnterpriseStoryTags.Services
                         return;
                     }
 
-                    solution.AppendToStatus("Tags Deletion Complete.");
+                    solution.AppendToStatus("Tags removal complete");
                 }
+
+                solution.AppendToStatus("Updating tags...");
 
                 applyUpdate = UpdateTags(
                     solution,
                     teamStories,
                     (storyId, item) => UpdateItem(solution, item, tags[storyId]),
                     !solution.AllowOwnershipTransfer && !solution.RemoveOldTags);
+
+                solution.AppendToStatus("Tags update complete");
 
                 if (applyUpdate)
                 {
@@ -127,7 +131,7 @@ namespace SCEnterpriseStoryTags.Services
                     }
                 }
 
-                solution.AppendToStatus("Complete.");
+                solution.AppendToStatus("Complete");
 
             }
             catch (Exception ex)

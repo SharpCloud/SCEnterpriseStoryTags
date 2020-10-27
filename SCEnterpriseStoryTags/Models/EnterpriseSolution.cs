@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace SCEnterpriseStoryTags.Models
@@ -146,7 +147,10 @@ namespace SCEnterpriseStoryTags.Models
 
         public void AppendToStatus(string text)
         {
-            Status += $"{text}\n";
+            var now = DateTime.Now;
+            var timestamp = $"{now.ToShortDateString()} {now.ToLongTimeString()}";
+
+            Status += $"[{timestamp}] {text}\n";
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

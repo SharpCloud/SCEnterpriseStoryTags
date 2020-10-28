@@ -31,8 +31,9 @@ namespace SCEnterpriseStoryTags.Repositories
             _storyCache = new Dictionary<string, StoryRepositoryCacheEntry>();
         }
 
-        public void Save(Story story)
+        public void Save(EnterpriseSolution solution, Story story)
         {
+            solution.AppendToStatus($"Saving '{story.Name}'");
             story.Save();
         }
 

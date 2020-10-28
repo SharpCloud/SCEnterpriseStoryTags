@@ -7,7 +7,7 @@ namespace SCEnterpriseStoryTags.Interfaces
     public interface IStoryRepository
     {
         void Reset();
-        void Save(Story story);
+        void Save(EnterpriseSolution solution, Story story);
         Task<bool> TransferOwner(EnterpriseSolution solution, string newOwnerUsername, Story story, int postTransferDelay);
         StoryLite[] LoadTeamStories(EnterpriseSolution solution);
         StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id);

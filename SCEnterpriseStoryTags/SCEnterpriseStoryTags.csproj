@@ -130,6 +130,7 @@
     <Compile Include="Converters\UrlToStoryIdConverter.cs" />
     <Compile Include="Interfaces\IActionCommand.cs" />
     <Compile Include="Interfaces\ICommandsViewModel.cs" />
+    <Compile Include="Interfaces\IIOService.cs" />
     <Compile Include="Interfaces\IMainViewModel.cs" />
     <Compile Include="Interfaces\IMessageService.cs" />
     <Compile Include="Interfaces\IPasswordService.cs" />

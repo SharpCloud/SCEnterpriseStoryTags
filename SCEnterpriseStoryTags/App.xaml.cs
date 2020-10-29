@@ -1,4 +1,5 @@
-﻿using SCEnterpriseStoryTags.Services;
+﻿using System;
+using SCEnterpriseStoryTags.ViewModels;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -21,8 +22,8 @@ namespace SCEnterpriseStoryTags
 
         private void Current_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            var message = $"{e.Exception.Message} {e.Exception.StackTrace}";
-            IOService.WriteToFile("SCEnterpriseStoryTags.log", message, false);
+            var message = $"[{DateTime.UtcNow}] {e.Exception.Message} {e.Exception.StackTrace}{Environment.NewLine}";
+            ViewModelLocator.IOService.WriteToFile("SCEnterpriseStoryTags.log", message, false);
         }
     }
 }

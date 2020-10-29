@@ -1,15 +1,16 @@
-﻿using System;
+﻿using SCEnterpriseStoryTags.Interfaces;
+using System;
 using System.IO;
 
 namespace SCEnterpriseStoryTags.Services
 {
-    public static class IOService
+    public class IOService : IIOService
     {
         private static readonly string DataFolderPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "SharpCloudEnterpriseStoryTags");
 
-        public static string ReadFromFile(string filename)
+        public string ReadFromFile(string filename)
         {
             var fullPath = Path.Combine(DataFolderPath, filename);
 
@@ -20,7 +21,7 @@ namespace SCEnterpriseStoryTags.Services
             return data;
         }
 
-        public static void WriteToFile(string filename, string data, bool overwrite)
+        public void WriteToFile(string filename, string data, bool overwrite)
         {
             Directory.CreateDirectory(DataFolderPath);
 

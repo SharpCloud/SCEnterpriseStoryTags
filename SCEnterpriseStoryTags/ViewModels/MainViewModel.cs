@@ -19,6 +19,7 @@ namespace SCEnterpriseStoryTags.ViewModels
     {
         private const string ConfigFile = "SCEnterpriseStoryTags.json";
 
+        private readonly IIOService _ioService;
         private readonly IPasswordService _passwordService;
         private readonly IUpdateService _updateService;
 
@@ -88,9 +89,11 @@ namespace SCEnterpriseStoryTags.ViewModels
         }
 
         public MainViewModel(
+            IIOService ioService,
             IPasswordService passwordService,
             IUpdateService updateService)
         {
+            _ioService = ioService;
             _passwordService = passwordService;
             _updateService = updateService;
             AppName = GetAppName();
@@ -98,7 +101,7 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         public void LoadValues()
         {
-            var json = IOService.ReadFromFile(ConfigFile);
+            var json = _ioService.ReadFromFile(ConfigFile);
             var config = JsonConvert.DeserializeObject<SaveData>(json) ?? new SaveData
             {
                 Solutions = new ObservableCollection<EnterpriseSolution>
@@ -195,7 +198,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             };
 
             var json = JsonConvert.SerializeObject(data);
-            IOService.WriteToFile(ConfigFile, json, true);
+            _ioService.WriteToFile(ConfigFile, json, true);
         }
 
         public void AddNewSolution()
@@ -256,7 +259,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             var name = originalName;
             var counter = 2;
 
-            while (Solutions.Select(s => s.Name).Contains(name))
+            while (Solutions != null && Solutions.Select(s => s.Name).Contains(name))
             {
                 name = originalName + $" ({counter})";
                 counter++;

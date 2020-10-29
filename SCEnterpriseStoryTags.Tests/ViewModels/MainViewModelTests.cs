@@ -1,15 +1,16 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
 using Moq;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
 using SCEnterpriseStoryTags.ViewModels;
+using System.Collections.ObjectModel;
 
 namespace SCEnterpriseStoryTags.Tests.ViewModels
 {
     [TestFixture]
-    public class ViewModelTests
+    public class MainViewModelTests
     {
         [Test]
         public void MoveSolutionUpDecrementsIndexPosition()
@@ -20,6 +21,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -49,6 +51,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -78,6 +81,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -107,6 +111,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -147,6 +152,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solutionB = new EnterpriseSolution();
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -184,6 +190,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var solution = new EnterpriseSolution();
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -214,6 +221,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             };
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -241,6 +249,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             // Arrange
 
             var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -258,6 +267,36 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             Assert.AreEqual("Enterprise Solution", vm.Solutions[0].Name);
             Assert.AreEqual("Enterprise Solution (2)", vm.Solutions[1].Name);
             Assert.AreEqual("Enterprise Solution (3)", vm.Solutions[2].Name);
+        }
+
+        [Test]
+        public void LoadCreatesDefaultSolutionIfNoSaveDataFound()
+        {
+            // Arrange
+
+            var vm = new MainViewModel(
+                Mock.Of<IIOService>(s =>
+                    s.ReadFromFile(It.IsAny<string>()) == string.Empty),
+                Mock.Of<IPasswordService>(),
+                Mock.Of<IUpdateService>())
+            {
+                FormFieldFocusActions = new Dictionary<FormFields, Action>
+                {
+                    [FormFields.Password] = () => { },
+                    [FormFields.Team] = () => { },
+                    [FormFields.Template] = () => { },
+                    [FormFields.Url] = () => { },
+                    [FormFields.Username] = () => { }
+                }
+            };
+
+            // Act
+
+            vm.LoadValues();
+
+            // Assert
+
+            Assert.NotNull(vm.Solutions);
         }
     }
 }

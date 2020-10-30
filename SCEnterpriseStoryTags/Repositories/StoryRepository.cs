@@ -25,10 +25,20 @@ namespace SCEnterpriseStoryTags.Repositories
             _passwordService = passwordService;
         }
 
+        public void ReinitialiseCache(params StoryRepositoryCacheEntry[] initialData)
+        {
+            _storyCache = new Dictionary<string, StoryRepositoryCacheEntry>();
+
+            foreach (var data in initialData)
+            {
+                _storyCache.Add(data.Story.Id, data);
+            }
+        }
+
         public void Reset()
         {
             _sc = null;
-            _storyCache = new Dictionary<string, StoryRepositoryCacheEntry>();
+            ReinitialiseCache();
         }
 
         public void Save(EnterpriseSolution solution, Story story)
@@ -78,25 +88,11 @@ namespace SCEnterpriseStoryTags.Repositories
 
         public StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id)
         {
-            return GetStory(solution, id, null, true);
+            return GetStory(solution, id, null);
         }
 
         public StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id, string loadingMessage)
         {
-            return GetStory(solution, id, loadingMessage, true);
-        }
-
-        public StoryRepositoryCacheEntry GetStory(
-            EnterpriseSolution solution,
-            string id,
-            string loadingMessage,
-            bool useCache)
-        {
-            if (!useCache && _storyCache.ContainsKey(id))
-            {
-                _storyCache.Remove(id);
-            }
-
             if (!_storyCache.ContainsKey(id))
             {
                 try

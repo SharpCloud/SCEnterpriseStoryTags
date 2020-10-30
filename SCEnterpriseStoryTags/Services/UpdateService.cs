@@ -56,6 +56,8 @@ namespace SCEnterpriseStoryTags.Services
                 if (solution.RemoveOldTags)
                 {
                     solution.AppendToStatus("Removing tags...");
+                    _storyRepository.ReinitialiseCache(templateStoryCacheItem);
+
                     applyUpdate = UpdateTags(
                         solution,
                         teamStories,
@@ -76,6 +78,7 @@ namespace SCEnterpriseStoryTags.Services
                 }
 
                 solution.AppendToStatus("Updating tags...");
+                _storyRepository.ReinitialiseCache(templateStoryCacheItem);
 
                 applyUpdate = UpdateTags(
                     solution,
@@ -129,7 +132,7 @@ namespace SCEnterpriseStoryTags.Services
                         continue;
                     }
 
-                    cacheEntry = _storyRepository.GetStory(solution, id, null, false);
+                    cacheEntry = _storyRepository.GetStory(solution, id, null);
                 }
 
                 if (cacheEntry.IsAdmin)
@@ -194,7 +197,7 @@ namespace SCEnterpriseStoryTags.Services
 
             foreach (var s in stories)
             {
-                var storyCacheItem = _storyRepository.GetStory(solution, s.Id, null, false);
+                var storyCacheItem = _storyRepository.GetStory(solution, s.Id, null);
                 if (storyCacheItem.Story != null)
                 {
                     foreach (var i in storyCacheItem.Story.Items)

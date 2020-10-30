@@ -54,7 +54,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry &&
-                r.GetStory(solution, ChildId, It.IsAny<string>(), false) == cCacheEntry &&
+                r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
                 r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
@@ -101,7 +101,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
-                r.GetStory(solution, ChildId, It.IsAny<string>(), false) == cCacheEntry &&
+                r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
                 r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
@@ -142,7 +142,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
-                r.GetStory(solution, ChildId, It.IsAny<string>(), false) == cCacheEntry &&
+                r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
                 r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
@@ -205,8 +205,8 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 });
 
             Mock.Get(repository)
-                .Setup(r => r.GetStory(solution, ChildId, It.IsAny<string>(), false))
-                .Returns<EnterpriseSolution, string, string, bool>((e, id, msg, c) => new StoryRepositoryCacheEntry
+                .Setup(r => r.GetStory(solution, ChildId, It.IsAny<string>()))
+                .Returns<EnterpriseSolution, string, string>((e, id, msg) => new StoryRepositoryCacheEntry
                 {
                     IsAdmin = cStory.StoryAsRoadmap.Owner.Username == solutionUsername,
                     Story = cStory
@@ -265,7 +265,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry &&
-                r.GetStory(solution, ChildId, It.IsAny<string>(), false) == cCacheEntry &&
+                r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
                 r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 

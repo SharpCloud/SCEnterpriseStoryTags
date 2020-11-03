@@ -1,17 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
 using SCEnterpriseStoryTags.Interfaces;
 using SCEnterpriseStoryTags.Models;
 using SCEnterpriseStoryTags.ViewModels;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using SC.API.ComInterop.Models;
 
 namespace SCEnterpriseStoryTags.Tests.ViewModels
 {
     [TestFixture]
     public class MainViewModelTests
     {
+        private readonly Dictionary<FormFields, Action> _defaultFormFieldFocusActions = new Dictionary<FormFields, Action>
+        {
+            [FormFields.Password] = () => { },
+            [FormFields.Team] = () => { },
+            [FormFields.Template] = () => { },
+            [FormFields.Url] = () => { },
+            [FormFields.Username] = () => { }
+        };
+
         [Test]
         public void MoveSolutionUpDecrementsIndexPosition()
         {
@@ -22,6 +33,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -52,6 +64,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -82,6 +95,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -112,6 +126,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -153,6 +168,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -191,6 +207,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -222,6 +239,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -250,6 +268,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -277,17 +296,11 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             var vm = new MainViewModel(
                 Mock.Of<IIOService>(s =>
                     s.ReadFromFile(It.IsAny<string>()) == string.Empty),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
-                FormFieldFocusActions = new Dictionary<FormFields, Action>
-                {
-                    [FormFields.Password] = () => { },
-                    [FormFields.Team] = () => { },
-                    [FormFields.Template] = () => { },
-                    [FormFields.Url] = () => { },
-                    [FormFields.Username] = () => { }
-                }
+                FormFieldFocusActions = _defaultFormFieldFocusActions
             };
 
             // Act
@@ -297,6 +310,99 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
             // Assert
 
             Assert.NotNull(vm.Solutions);
+        }
+
+        [Test]
+        public async Task StoriesAreUpdatedIfPreflightSucceeds()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution
+            {
+                Url = "http",
+                Username = "Username",
+                Team = "team",
+                TemplateId = "TemplateId"
+            };
+
+            var updateServiceMock = new Mock<IUpdateService>();
+
+            StoryLite[] loadedStories = null;
+            updateServiceMock
+                .Setup(s => s.UpdateStoriesPreflight(
+                    solution,
+                    out It.Ref<StoryLite[]>.IsAny))
+                .Returns<EnterpriseSolution, StoryLite[]>((s, stories) =>
+                {
+                    loadedStories = stories;
+                    return true;
+                });
+
+            var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
+                Mock.Of<IPasswordService>(s => s.LoadPassword(solution) == "password"),
+                updateServiceMock.Object)
+            {
+                FormFieldFocusActions = _defaultFormFieldFocusActions,
+                SelectedSolution = solution
+            };
+
+            // Act
+
+            await vm.ValidateAndRun();
+
+            // Assert
+
+            updateServiceMock.Verify(s =>
+                s.UpdateStoriesPreflight(solution, out It.Ref<StoryLite[]>.IsAny), Times.Once);
+
+            updateServiceMock.Verify(s =>
+                s.UpdateStories(solution, loadedStories), Times.Once);
+        }
+
+        [Test]
+        public async Task StoriesAreNotUpdatedIfPreflightFails()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution
+            {
+                Url = "http",
+                Username = "Username",
+                Team = "team",
+                TemplateId = "TemplateId"
+            };
+
+            var updateService = Mock.Of<IUpdateService>(s =>
+                s.UpdateStoriesPreflight(solution, out It.Ref<StoryLite[]>.IsAny) == false);
+
+            var vm = new MainViewModel(
+                Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
+                Mock.Of<IPasswordService>(s => s.LoadPassword(solution) == "password"),
+                updateService)
+            {
+                FormFieldFocusActions = _defaultFormFieldFocusActions,
+                SelectedSolution = solution
+            };
+
+            // Act
+
+            await vm.ValidateAndRun();
+
+            // Assert
+
+            Mock.Get(updateService).Verify(s => s.UpdateStoriesPreflight(
+                solution,
+                out It.Ref<StoryLite[]>.IsAny), Times.Once);
+
+            Mock.Get(updateService).Verify(s => s.UpdateStories(
+                It.IsAny<EnterpriseSolution>(),
+                It.IsAny<StoryLite[]>()), Times.Never);
+
+            var hasAbort = solution.Status.Contains("Aborting process");
+            Assert.IsTrue(hasAbort);
         }
     }
 }

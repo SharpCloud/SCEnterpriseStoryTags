@@ -6,6 +6,7 @@ namespace SCEnterpriseStoryTags.Interfaces
 {
     public interface IStoryRepository
     {
+        bool IsTeamAdmin(EnterpriseSolution solution);
         void ReinitialiseCache(params StoryRepositoryCacheEntry[] initialData);
         void Reset();
         void Save(EnterpriseSolution solution, Story story);

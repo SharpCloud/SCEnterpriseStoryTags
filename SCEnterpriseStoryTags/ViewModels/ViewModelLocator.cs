@@ -16,6 +16,7 @@ namespace SCEnterpriseStoryTags.ViewModels
         
         public static IMainViewModel MainViewModel { get; } = new MainViewModel(
             IOService,
+            MessageService,
             PasswordService,
             new UpdateService(Delay, MessageService, StoryRepository));
         

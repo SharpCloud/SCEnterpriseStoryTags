@@ -25,6 +25,38 @@ namespace SCEnterpriseStoryTags.Repositories
             _passwordService = passwordService;
         }
 
+        public bool IsTeamAdmin(EnterpriseSolution solution)
+        {
+            var isAdmin = false;
+
+            if (_sc == null)
+            {
+                _sc = new SharpCloudApi(
+                    solution.Username,
+                    _passwordService.LoadPassword(solution),
+                    solution.Url);
+            }
+
+            if (solution.IsDirectory)
+            {
+                var directory = _sc.Directories.FirstOrDefault(d => d.Id == solution.Team);
+                if (directory != null)
+                {
+                    isAdmin = directory.Role.Equals("admin", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            else
+            {
+                var team = _sc.Teams.FirstOrDefault(t => t.Id == solution.Team);
+                if (team != null)
+                {
+                    isAdmin = team.Role.Equals("admin", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
+            return isAdmin;
+        }
+
         public void ReinitialiseCache(params StoryRepositoryCacheEntry[] initialData)
         {
             _storyCache = new Dictionary<string, StoryRepositoryCacheEntry>();
@@ -97,14 +129,6 @@ namespace SCEnterpriseStoryTags.Repositories
             {
                 try
                 {
-                    if (_sc == null)
-                    {
-                        _sc = new SharpCloudApi(
-                            solution.Username,
-                            _passwordService.LoadPassword(solution),
-                            solution.Url);
-                    }
-
                     if (!string.IsNullOrWhiteSpace(loadingMessage))
                     {
                         solution.AppendToStatus(loadingMessage);
@@ -125,14 +149,14 @@ namespace SCEnterpriseStoryTags.Repositories
                     
                     if (!entry.IsAdmin)
                     {
-                        solution.AppendToStatus($"WARNING: You don't have admin permission on story '{entry.Story.Name}'");
+                        solution.AppendToStatus($"Warning: you don't have admin permission on story '{entry.Story.Name}'");
                     }
 
                     _storyCache.Add(id, entry);
                 }
                 catch (Exception)
                 {
-                    solution.AppendToStatus($"WARNING: there was a problem loading '{id}'");
+                    solution.AppendToStatus($"Warning: there was a problem loading '{id}'");
                     _storyCache.Add(id, null);
                 }
             }

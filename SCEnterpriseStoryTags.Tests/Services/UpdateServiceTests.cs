@@ -55,14 +55,13 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry &&
                 r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
-                r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
             var service = new UpdateService(0, messageService, repository);
 
             // Act
 
-             await service.UpdateStories(solution);
+            await service.UpdateStories(solution, new[] {tStoryLite, cStoryLite});
 
             // Assert
 
@@ -102,14 +101,13 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
-                r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
             var service = new UpdateService(0, messageService, repository);
 
             // Act
 
-            await service.UpdateStories(solution);
+            await service.UpdateStories(solution, new[] {tStoryLite, cStoryLite});
 
             // Assert
 
@@ -143,14 +141,13 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
-                r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
             var service = new UpdateService(0, messageService, repository);
 
             // Act
 
-            await service.UpdateStories(solution);
+            await service.UpdateStories(solution, new[] {tStoryLite, cStoryLite});
 
             // Assert
 
@@ -193,7 +190,6 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry &&
-                r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
             Mock.Get(repository)
@@ -216,7 +212,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             // Act
 
-            await service.UpdateStories(solution);
+            await service.UpdateStories(solution, new[] {tStoryLite, cStoryLite});
 
             // Assert
 
@@ -266,7 +262,6 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry &&
                 r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
-                r.LoadTeamStories(solution) == new[] {tStoryLite, cStoryLite} &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
             Mock.Get(repository)
@@ -277,7 +272,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             // Act
 
-            await service.UpdateStories(solution);
+            await service.UpdateStories(solution, new[] {tStoryLite, cStoryLite});
 
             // Assert
 
@@ -303,6 +298,236 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 originalStoryOwner,
                 It.IsAny<Story>(),
                 It.IsAny<int>()), Times.Never);
+        }
+
+        [Test]
+        public void UpdateStoriesPreflightReturnsTrueIfTeamAdmin()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution();
+            var messageService = Mock.Of<IMessageService>();
+            var repository = Mock.Of<IStoryRepository>(r => r.IsTeamAdmin(solution));
+            var service = new UpdateService(0, messageService, repository);
+
+            // Act
+
+            var result = service.UpdateStoriesPreflight(solution, out _);
+
+            // Assert
+
+            Assert.IsTrue(result);
+
+            Mock.Get(messageService).Verify(s => s.Show(It.IsAny<string>()), Times.Never);
+            
+            Mock.Get(messageService).Verify(s => s.Show(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<MessageBoxButton>()), Times.Never);
+        }
+
+        [Test]
+        public void WarningIsLoggedIfNotTeamAdmin()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution();
+
+            var repository = Mock.Of<IStoryRepository>(r =>
+                r.IsTeamAdmin(solution) == false);
+
+            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+
+            // Act
+
+            service.UpdateStoriesPreflight(solution, out _);
+
+            // Assert
+
+            var hasWarning = solution.Status.Contains("Warning: team admin permissions unavailable");
+            Assert.IsTrue(hasWarning);
+        }
+
+        [Test]
+        public void ErrorIsShownIfStoryCannotLoad()
+        {
+            // Arrange
+
+            var storyLite = new StoryLite(new RoadmapLite
+            {
+                ID = new Guid(TemplateId),
+                Name = "Template Story"
+            }, null);
+
+            var solution = new EnterpriseSolution();
+            var teamStories = new[] {storyLite};
+
+            var repository = Mock.Of<IStoryRepository>(r =>
+                r.IsTeamAdmin(solution) == false &&
+                r.LoadTeamStories(solution) == teamStories &&
+                r.GetStory(solution, TemplateId) == new StoryRepositoryCacheEntry());
+
+            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+
+            // Act
+
+            var result = service.UpdateStoriesPreflight(solution, out _);
+
+            // Assert
+
+            Assert.IsFalse(result);
+
+            var hasError = solution.Status.Contains("Error: Cannot load story 'Template Story'");
+            Assert.IsTrue(hasError);
+        }
+
+        [Test]
+        public void UpdateStoriesPreflightReturnsTrueIfNotTeamAdminButAdminOnAllStories()
+        {
+            // Arrange
+
+            var (_, tStoryLite, tCacheEntry) = CreateStory(TemplateId, true);
+            var (_, cStoryLite, cCacheEntry) = CreateStory(ChildId, true);
+
+            var solution = new EnterpriseSolution();
+            var teamStories = new[] {tStoryLite, cStoryLite};
+
+            var repository = Mock.Of<IStoryRepository>(r =>
+                r.IsTeamAdmin(solution) == false &&
+                r.LoadTeamStories(solution) == teamStories &&
+                r.GetStory(solution, TemplateId) == tCacheEntry &&
+                r.GetStory(solution, ChildId) == cCacheEntry);
+
+            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+
+            // Act
+
+            var result = service.UpdateStoriesPreflight(solution, out var loadedStories);
+
+            // Assert
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(teamStories, loadedStories);
+        }
+
+        [Test]
+        public void UpdateStoriesPreflightReturnsFalseIfNotTeamAdminAndNotStoryAdmin()
+        {
+            // Arrange
+
+            var (_, tStoryLite, tCacheEntry) = CreateStory(TemplateId, true);
+            var (cStory, cStoryLite, cCacheEntry) = CreateStory(ChildId, false);
+
+            cStory.Name = "Child Story";
+            cStory.StoryAsRoadmap.Owner = new User
+            {
+                Username = "ChildStoryOwner"
+            };
+
+            var solution = new EnterpriseSolution();
+            var teamStories = new[] {tStoryLite, cStoryLite};
+
+            var repository = Mock.Of<IStoryRepository>(r =>
+                r.IsTeamAdmin(solution) == false &&
+                r.LoadTeamStories(solution) == teamStories &&
+                r.GetStory(solution, TemplateId) == tCacheEntry &&
+                r.GetStory(solution, ChildId) == cCacheEntry);
+
+            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+
+            // Act
+
+            var result = service.UpdateStoriesPreflight(solution, out var loadedStories);
+
+            // Assert
+
+            Assert.IsFalse(result);
+            Assert.AreEqual(teamStories, loadedStories);
+
+            var hasError = solution.Status.Contains(
+                "Error: Admin permissions unavailable for 'Child Story'. Please contact story owner 'ChildStoryOwner'");
+
+            Assert.IsTrue(hasError);
+        }
+
+        [Test]
+        public void UpdateStoriesPreflightReturnsFalseWhenDirectoryDoesNotExist()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution
+            {
+                IsDirectory = true
+            };
+
+            var service = new UpdateService(
+                0,
+                Mock.Of<IMessageService>(),
+                Mock.Of<IStoryRepository>(r =>
+                    r.LoadTeamStories(It.IsAny<EnterpriseSolution>()) == null));
+
+            // Act
+
+            var result = service.UpdateStoriesPreflight(solution, out _);
+
+            // Assert
+
+            Assert.IsFalse(result);
+
+            var hasError = solution.Status.Contains("Oops... Looks like your directory does not exist");
+            Assert.IsTrue(hasError);
+        }
+
+        [Test]
+        public void UpdateStoriesPreflightReturnsFalseWhenTeamDoesNotExist()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution
+            {
+                IsDirectory = false
+            };
+
+            var service = new UpdateService(
+                0,
+                Mock.Of<IMessageService>(),
+                Mock.Of<IStoryRepository>(r =>
+                    r.LoadTeamStories(It.IsAny<EnterpriseSolution>()) == null));
+
+            // Act
+
+            var result = service.UpdateStoriesPreflight(solution, out _);
+
+            // Assert
+
+            Assert.IsFalse(result);
+
+            var hasError = solution.Status.Contains("Oops... Looks like your team does not exist");
+            Assert.IsTrue(hasError);
+        }
+
+        [Test]
+        public async Task UpdateStoriesDoesNotClearStatus()
+        {
+            // Arrange
+
+            const string existingStatus = "Existing Status Message";
+
+            var solution = new EnterpriseSolution
+            {
+                Status = existingStatus
+            };
+
+            var service = new UpdateService(0, Mock.Of<IMessageService>(), Mock.Of<IStoryRepository>());
+
+            // Act
+
+            await service.UpdateStories(solution, It.IsAny<StoryLite[]>());
+
+            // Assert
+
+            var hasStatus = solution.Status.Contains(existingStatus);
+            Assert.IsTrue(hasStatus);
         }
     }
 }

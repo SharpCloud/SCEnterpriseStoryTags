@@ -20,6 +20,7 @@ namespace SCEnterpriseStoryTags.ViewModels
         private const string ConfigFile = "SCEnterpriseStoryTags.json";
 
         private readonly IIOService _ioService;
+        private readonly IMessageService _messageService;
         private readonly IPasswordService _passwordService;
         private readonly IUpdateService _updateService;
 
@@ -90,10 +91,12 @@ namespace SCEnterpriseStoryTags.ViewModels
 
         public MainViewModel(
             IIOService ioService,
+            IMessageService messageService,
             IPasswordService passwordService,
             IUpdateService updateService)
         {
             _ioService = ioService;
+            _messageService = messageService;
             _passwordService = passwordService;
             _updateService = updateService;
             AppName = GetAppName();
@@ -179,14 +182,25 @@ namespace SCEnterpriseStoryTags.ViewModels
         public async Task ValidateAndRun()
         {
             SaveValues();
+            
             if (!IsValid())
             {
-                MessageBox.Show(IsValidText());
+                _messageService.Show(IsValidText());
                 return;
             }
 
             IsIdle = false;
-            await _updateService.UpdateStories(SelectedSolution);
+            
+            var isOk = _updateService.UpdateStoriesPreflight(SelectedSolution, out var teamStories);
+            if (isOk)
+            {
+                await _updateService.UpdateStories(SelectedSolution, teamStories);
+            }
+            else
+            {
+                SelectedSolution.AppendToStatus("Aborting process");
+            }
+
             IsIdle = true;
         }
 

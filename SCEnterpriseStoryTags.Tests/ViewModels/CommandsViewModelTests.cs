@@ -21,6 +21,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var mvm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -60,6 +61,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var mvm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -99,6 +101,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var mvm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {
@@ -143,6 +146,7 @@ namespace SCEnterpriseStoryTags.Tests.ViewModels
 
             var mvm = new MainViewModel(
                 Mock.Of<IIOService>(),
+                Mock.Of<IMessageService>(),
                 Mock.Of<IPasswordService>(),
                 Mock.Of<IUpdateService>())
             {

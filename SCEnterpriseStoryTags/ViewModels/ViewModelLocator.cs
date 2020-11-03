@@ -18,7 +18,7 @@ namespace SCEnterpriseStoryTags.ViewModels
             IOService,
             MessageService,
             PasswordService,
-            new UpdateService(Delay, MessageService, StoryRepository));
+            new UpdateService(Delay, StoryRepository));
         
         public static ICommandsViewModel CommandsViewModel { get; } = new CommandsViewModel(MainViewModel);
     }

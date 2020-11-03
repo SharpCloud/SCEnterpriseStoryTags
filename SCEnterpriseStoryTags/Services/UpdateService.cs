@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace SCEnterpriseStoryTags.Services
 {
@@ -14,16 +13,13 @@ namespace SCEnterpriseStoryTags.Services
         private const string TagGroup = "UsedInStories";
 
         private readonly int _ownershipTransferDelay;
-        private readonly IMessageService _messageService;
         private readonly IStoryRepository _storyRepository;
 
         public UpdateService(
             int ownershipTransferDelay,
-            IMessageService messageService,
             IStoryRepository storyRepository)
         {
             _ownershipTransferDelay = ownershipTransferDelay;
-            _messageService = messageService;
             _storyRepository = storyRepository;
         }
 
@@ -84,48 +80,48 @@ namespace SCEnterpriseStoryTags.Services
         {
             try
             {
-                var templateStoryCacheItem = _storyRepository.GetStory(solution, solution.TemplateId, "Reading template...");
-                var tags = CreateTagsInTemplateStory(solution, teamStories, templateStoryCacheItem.Story);
-                await SaveStories(solution, true);
+                if (solution.AllowOwnershipTransfer)
+                {
+                    solution.AppendToStatus("Acquiring admin permissions on all stories");
+                    var success = await GetAdminPermissions(solution, teamStories);
 
-                var applyUpdate = false;
+                    if (success)
+                    {
+                        solution.AppendToStatus("Acquired admin permissions on all stories");
+                    }
+                    else
+                    {
+                        solution.AppendToStatus("Failed to acquire admin permissions on all stories. Aborting");
+                        return;
+                    }
+                }
+
+                var templateStoryCacheItem =
+                    _storyRepository.GetStory(solution, solution.TemplateId, "Reading template...");
+
+                var tags = CreateTagsInTemplateStory(solution, teamStories, templateStoryCacheItem.Story);
+                SaveStories(solution, true);
+
                 if (solution.RemoveOldTags)
                 {
                     solution.AppendToStatus("Removing tags...");
                     _storyRepository.ReinitialiseCache(templateStoryCacheItem);
 
-                    applyUpdate = UpdateTags(
+                    UpdateTags(
                         solution,
                         teamStories,
-                        (_, item) => RemoveTags(solution, item, tags),
-                        !solution.AllowOwnershipTransfer);
-
-                    if (applyUpdate)
-                    {
-                        await SaveStories(solution, false);
-                    }
-                    else
-                    {
-                        solution.AppendToStatus("Aborting process due to cancellation by user");
-                        return;
-                    }
-
+                        (_, item) => RemoveTags(solution, item, tags));
+                    
                     solution.AppendToStatus("Tags removal complete");
                 }
 
                 solution.AppendToStatus("Updating tags...");
                 _storyRepository.ReinitialiseCache(templateStoryCacheItem);
 
-                applyUpdate = UpdateTags(
+                UpdateTags(
                     solution,
                     teamStories,
-                    (storyId, item) => UpdateItem(solution, item, tags[storyId]),
-                    !solution.AllowOwnershipTransfer && !solution.RemoveOldTags);
-
-                if (applyUpdate)
-                {
-                    await SaveStories(solution, false);
-                }
+                    (storyId, item) => UpdateItem(solution, item, tags[storyId]));
 
                 solution.AppendToStatus("Tags update complete");
                 solution.AppendToStatus("Complete");
@@ -139,7 +135,7 @@ namespace SCEnterpriseStoryTags.Services
             }
         }
 
-        private async Task SaveStories(EnterpriseSolution solution, bool templateOnly)
+        private void SaveStories(EnterpriseSolution solution, bool templateOnly)
         {
             var storyIds = templateOnly
                 ? new[] {solution.TemplateId}
@@ -151,25 +147,6 @@ namespace SCEnterpriseStoryTags.Services
             foreach (var id in storyIds)
             {
                 var cacheEntry = _storyRepository.GetStory(solution, id);
-                var originalOwner = string.Empty;
-
-                if (solution.AllowOwnershipTransfer && !cacheEntry.IsAdmin)
-                {
-                    originalOwner = cacheEntry.Story.StoryAsRoadmap.Owner.Username;
-
-                    var success = await _storyRepository.TransferOwner(
-                        solution,
-                        solution.Username,
-                        cacheEntry.Story,
-                        _ownershipTransferDelay);
-
-                    if (!success)
-                    {
-                        continue;
-                    }
-
-                    cacheEntry = _storyRepository.GetStory(solution, id, null);
-                }
 
                 if (cacheEntry.IsAdmin)
                 {
@@ -178,15 +155,6 @@ namespace SCEnterpriseStoryTags.Services
                 else
                 {
                     solution.AppendToStatus($"Story '{cacheEntry.Story.Name}' NOT saved");
-                }
-
-                if (!string.IsNullOrWhiteSpace(originalOwner))
-                {
-                    await _storyRepository.TransferOwner(
-                        solution,
-                        originalOwner,
-                        cacheEntry.Story,
-                        0);
                 }
             }
         }
@@ -197,35 +165,34 @@ namespace SCEnterpriseStoryTags.Services
             Story templateStory)
         {
             var tags = new Dictionary<string, ItemTag>();
-            foreach (var ts in teamStories)
-            {
-                if (string.Equals(ts.Id, solution.TemplateId, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    continue;
-                }
 
-                var tag = templateStory.ItemTag_FindByName(ts.Name);
+            var stories = teamStories.Where(s => !s.Id.Equals(
+                solution.TemplateId,
+                StringComparison.CurrentCultureIgnoreCase));
+
+            foreach (var s in stories)
+            {
+                var tag = templateStory.ItemTag_FindByName(s.Name);
                 var description = $"Created automatically [{DateTime.Now}]";
                 if (tag == null)
                 {
-                    solution.AppendToStatus($"Tag '{ts.Name}' created.");
-                    tag = templateStory.ItemTag_AddNew(ts.Name, description, TagGroup);
+                    solution.AppendToStatus($"Tag '{s.Name}' created.");
+                    tag = templateStory.ItemTag_AddNew(s.Name, description, TagGroup);
                 }
                 else
                 {
                     tag.Description = description;
                 }
 
-                tags.Add(ts.Id, tag);
+                tags.Add(s.Id, tag);
             }
             return tags;
         }
 
-        private bool UpdateTags(
+        private void UpdateTags(
             EnterpriseSolution solution,
             StoryLite[] teamStories,
-            Action<string, Item> update,
-            bool promptOnLowPermissions)
+            Action<string, Item> update)
         {
             var stories = teamStories.Where(s => !s.Id.Equals(
                 solution.TemplateId,
@@ -233,37 +200,59 @@ namespace SCEnterpriseStoryTags.Services
 
             foreach (var s in stories)
             {
-                var storyCacheItem = _storyRepository.GetStory(solution, s.Id, null);
-                if (storyCacheItem.Story != null)
+                var cacheEntry = _storyRepository.GetStory(solution, s.Id);
+                if (cacheEntry.Story != null)
                 {
-                    foreach (var i in storyCacheItem.Story.Items)
+                    foreach (var i in cacheEntry.Story.Items)
                     {
-                        update(storyCacheItem.Story.Id, i);
+                        update(cacheEntry.Story.Id, i);
                     }
                 }
             }
 
-            MessageBoxResult? result = null;
-            if (promptOnLowPermissions)
+            SaveStories(solution, false);
+        }
+
+        private async Task<bool> GetAdminPermissions(
+            EnterpriseSolution solution,
+            StoryLite[] teamStories)
+        {
+            var processSuccess = true;
+            foreach (var s in teamStories)
             {
-                var lowPermissionStories = _storyRepository.GetCachedStories().Where(s => !s.IsAdmin).ToArray();
-
-                if (lowPermissionStories.Length > 0)
+                var cacheEntry = _storyRepository.GetStory(solution, s.Id);
                 {
-                    var names = string.Join(Environment.NewLine, lowPermissionStories.Select(s => $"* {s.Story.Name}"));
+                    if (!cacheEntry.IsAdmin)
+                    {
+                        var originalOwner = cacheEntry.Story.StoryAsRoadmap.Owner.Username;
 
-                    var message =
-                        "You do not have Admin permissions on the following stories and will not be able to update them. Do you wish to continue?" +
-                        Environment.NewLine +
-                        Environment.NewLine +
-                        names;
+                        var success = await _storyRepository.TransferOwner(
+                            solution,
+                            solution.Username,
+                            cacheEntry.Story,
+                            _ownershipTransferDelay);
 
-                    result = _messageService.Show(message, "Warning", MessageBoxButton.YesNo);
+                        if (success)
+                        {
+                            cacheEntry = _storyRepository.GetStory(solution, s.Id, false);
+
+                            if (!string.IsNullOrWhiteSpace(originalOwner))
+                            {
+                                success = await _storyRepository.TransferOwner(
+                                    solution,
+                                    originalOwner,
+                                    cacheEntry.Story,
+                                    _ownershipTransferDelay);
+                            }
+                        }
+
+                        processSuccess &= success;
+                    }
+
                 }
             }
-
-            var applyUpdate = result != MessageBoxResult.No;
-            return applyUpdate;
+            
+            return processSuccess;
         }
 
         private void RemoveTags(EnterpriseSolution solution, Item item, Dictionary<string, ItemTag> tags)

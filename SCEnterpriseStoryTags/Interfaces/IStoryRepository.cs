@@ -14,6 +14,7 @@ namespace SCEnterpriseStoryTags.Interfaces
         StoryLite[] LoadTeamStories(EnterpriseSolution solution);
         StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id);
         StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id, string loadingMessage);
+        StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id, bool useCache);
         StoryRepositoryCacheEntry[] GetCachedStories();
     }
 }

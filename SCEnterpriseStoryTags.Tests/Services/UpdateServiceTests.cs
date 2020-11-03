@@ -48,8 +48,6 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 TemplateId = TemplateId
             };
 
-            var messageService = Mock.Of<IMessageService>();
-
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
@@ -57,18 +55,13 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
-            var service = new UpdateService(0, messageService, repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
             await service.UpdateStories(solution, new[] {tStoryLite, cStoryLite});
 
             // Assert
-
-            Mock.Get(messageService).Verify(s => s.Show(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<MessageBoxButton>()), Times.Never);
 
             Mock.Get(repository).Verify(r => r.Save(solution, tStory), Times.Exactly(3));
             Mock.Get(repository).Verify(r => r.Save(solution, cStory), Times.Exactly(2));
@@ -81,7 +74,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
         }
 
         [Test]
-        public async Task OnlyTemplateIsSavedWhenNotAdminOfChildAndRemovingOldTagsAndProcessCancelledByUser()
+        public async Task OnlyTemplateIsSavedWhenNotAdminOfChildAndRemovingOldTags()
         {
             // Arrange
 
@@ -94,16 +87,13 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 TemplateId = TemplateId
             };
 
-            var messageService = Mock.Of<IMessageService>(s =>
-                s.Show(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MessageBoxButton>()) == MessageBoxResult.No);
-
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
-                r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
+                r.GetStory(solution, ChildId) == cCacheEntry &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
-            var service = new UpdateService(0, messageService, repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -111,17 +101,12 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             // Assert
 
-            Mock.Get(messageService).Verify(s => s.Show(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<MessageBoxButton>()), Times.Once);
-
-            Mock.Get(repository).Verify(r => r.Save(It.IsAny<EnterpriseSolution>(), tStory), Times.Once);
+            Mock.Get(repository).Verify(r => r.Save(It.IsAny<EnterpriseSolution>(), tStory), Times.Exactly(3));
             Mock.Get(repository).Verify(r => r.Save(It.IsAny<EnterpriseSolution>(), cStory), Times.Never);
         }
 
         [Test]
-        public async Task OnlyTemplateIsSavedWhenNotAdminOfChildAndNotRemovingOldTagsAndProcessCancelledByUser()
+        public async Task OnlyTemplateIsSavedWhenNotAdminOfChildAndNotRemovingOldTags()
         {
             // Arrange
 
@@ -134,16 +119,13 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 TemplateId = TemplateId
             };
 
-            var messageService = Mock.Of<IMessageService>(s =>
-                s.Show(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<MessageBoxButton>()) == MessageBoxResult.No);
-
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
-                r.GetStory(solution, ChildId, It.IsAny<string>()) == cCacheEntry &&
+                r.GetStory(solution, ChildId) == cCacheEntry &&
                 r.GetCachedStories() == new[] {tCacheEntry, cCacheEntry});
 
-            var service = new UpdateService(0, messageService, repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -151,12 +133,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             // Assert
 
-            Mock.Get(messageService).Verify(s => s.Show(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<MessageBoxButton>()), Times.Once);
-
-            Mock.Get(repository).Verify(r => r.Save(It.IsAny<EnterpriseSolution>(), tStory), Times.Once);
+            Mock.Get(repository).Verify(r => r.Save(It.IsAny<EnterpriseSolution>(), tStory), Times.Exactly(2));
             Mock.Get(repository).Verify(r => r.Save(It.IsAny<EnterpriseSolution>(), cStory), Times.Never);
         }
 
@@ -184,8 +161,6 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 Username = solutionUsername
             };
 
-            var messageService = Mock.Of<IMessageService>();
-
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
@@ -201,25 +176,20 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 });
 
             Mock.Get(repository)
-                .Setup(r => r.GetStory(solution, ChildId, It.IsAny<string>()))
-                .Returns<EnterpriseSolution, string, string>((e, id, msg) => new StoryRepositoryCacheEntry
+                .Setup(r => r.GetStory(solution, ChildId, It.IsAny<bool>()))
+                .Returns<EnterpriseSolution, string, bool>((e, id, c) =>
                 {
-                    IsAdmin = cStory.StoryAsRoadmap.Owner.Username == solutionUsername,
-                    Story = cStory
+                    cCacheEntry.IsAdmin = cStory.StoryAsRoadmap.Owner.Username == solutionUsername;
+                    return cCacheEntry;
                 });
 
-            var service = new UpdateService(0, messageService, repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
             await service.UpdateStories(solution, new[] {tStoryLite, cStoryLite});
 
             // Assert
-
-            Mock.Get(messageService).Verify(s => s.Show(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<MessageBoxButton>()), Times.Never);
 
             Mock.Get(repository).Verify(r => r.Save(solution, tStory), Times.Exactly(2));
             Mock.Get(repository).Verify(r => r.Save(solution, cStory), Times.Once);
@@ -255,8 +225,6 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 Username = solutionUsername
             };
 
-            var messageService = Mock.Of<IMessageService>();
-
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, TemplateId, It.IsAny<string>()) == tCacheEntry &&
@@ -268,7 +236,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 .Setup(r => r.TransferOwner(solution, It.IsAny<string>(), cStory, It.IsAny<int>()))
                 .ReturnsAsync<EnterpriseSolution, string, Story, int, IStoryRepository, bool>((e, o, s, d) => false);
 
-            var service = new UpdateService(0, messageService, repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -276,12 +244,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             // Assert
 
-            Mock.Get(messageService).Verify(s => s.Show(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<MessageBoxButton>()), Times.Never);
-
-            Mock.Get(repository).Verify(r => r.Save(solution, tStory), Times.Exactly(2));
+            Mock.Get(repository).Verify(r => r.Save(solution, tStory), Times.Never);
 
             Mock.Get(repository).Verify(r => r.Save(
                 It.IsAny<EnterpriseSolution>(),
@@ -306,9 +269,8 @@ namespace SCEnterpriseStoryTags.Tests.Services
             // Arrange
 
             var solution = new EnterpriseSolution();
-            var messageService = Mock.Of<IMessageService>();
             var repository = Mock.Of<IStoryRepository>(r => r.IsTeamAdmin(solution));
-            var service = new UpdateService(0, messageService, repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -317,13 +279,6 @@ namespace SCEnterpriseStoryTags.Tests.Services
             // Assert
 
             Assert.IsTrue(result);
-
-            Mock.Get(messageService).Verify(s => s.Show(It.IsAny<string>()), Times.Never);
-            
-            Mock.Get(messageService).Verify(s => s.Show(
-                It.IsAny<string>(),
-                It.IsAny<string>(),
-                It.IsAny<MessageBoxButton>()), Times.Never);
         }
 
         [Test]
@@ -336,7 +291,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
             var repository = Mock.Of<IStoryRepository>(r =>
                 r.IsTeamAdmin(solution) == false);
 
-            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -367,7 +322,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.LoadTeamStories(solution) == teamStories &&
                 r.GetStory(solution, TemplateId) == new StoryRepositoryCacheEntry());
 
-            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -398,7 +353,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry);
 
-            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -433,7 +388,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 r.GetStory(solution, TemplateId) == tCacheEntry &&
                 r.GetStory(solution, ChildId) == cCacheEntry);
 
-            var service = new UpdateService(0, Mock.Of<IMessageService>(), repository);
+            var service = new UpdateService(0, repository);
 
             // Act
 
@@ -460,11 +415,8 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 IsDirectory = true
             };
 
-            var service = new UpdateService(
-                0,
-                Mock.Of<IMessageService>(),
-                Mock.Of<IStoryRepository>(r =>
-                    r.LoadTeamStories(It.IsAny<EnterpriseSolution>()) == null));
+            var service = new UpdateService(0, Mock.Of<IStoryRepository>(r =>
+                r.LoadTeamStories(It.IsAny<EnterpriseSolution>()) == null));
 
             // Act
 
@@ -488,11 +440,8 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 IsDirectory = false
             };
 
-            var service = new UpdateService(
-                0,
-                Mock.Of<IMessageService>(),
-                Mock.Of<IStoryRepository>(r =>
-                    r.LoadTeamStories(It.IsAny<EnterpriseSolution>()) == null));
+            var service = new UpdateService(0, Mock.Of<IStoryRepository>(r =>
+                r.LoadTeamStories(It.IsAny<EnterpriseSolution>()) == null));
 
             // Act
 
@@ -518,7 +467,7 @@ namespace SCEnterpriseStoryTags.Tests.Services
                 Status = existingStatus
             };
 
-            var service = new UpdateService(0, Mock.Of<IMessageService>(), Mock.Of<IStoryRepository>());
+            var service = new UpdateService(0, Mock.Of<IStoryRepository>());
 
             // Act
 

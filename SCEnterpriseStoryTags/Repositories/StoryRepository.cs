@@ -85,6 +85,8 @@ namespace SCEnterpriseStoryTags.Repositories
             Story story,
             int postTransferDelay)
         {
+            solution.AppendToStatus($"Transferring ownership of story '{story.Name}' to '{newOwnerUsername}'");
+
             var client = new RestClient(solution.Url);
             client.UseNewtonsoftJson();
 
@@ -102,7 +104,7 @@ namespace SCEnterpriseStoryTags.Repositories
             await Task.Delay(postTransferDelay);
 
             var message = response.IsSuccessful
-                ? $"Ownership of story '{story.Name}' has been transferred to {newOwnerUsername}"
+                ? $"Ownership of story '{story.Name}' has been transferred to '{newOwnerUsername}'"
                 : $"Ownership transfer failed: {response.StatusDescription} - {response.Content}";
 
             solution.AppendToStatus(message);
@@ -120,11 +122,30 @@ namespace SCEnterpriseStoryTags.Repositories
 
         public StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id)
         {
-            return GetStory(solution, id, null);
+            return GetStory(solution, id, null, true);
         }
 
         public StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id, string loadingMessage)
         {
+            return GetStory(solution, id, loadingMessage, true);
+        }
+
+        public StoryRepositoryCacheEntry GetStory(EnterpriseSolution solution, string id, bool useCache)
+        {
+            return GetStory(solution, id, null, useCache);
+        }
+
+        private StoryRepositoryCacheEntry GetStory(
+            EnterpriseSolution solution,
+            string id,
+            string loadingMessage,
+            bool useCache)
+        {
+            if (!useCache && _storyCache.ContainsKey(id))
+            {
+                _storyCache.Remove(id);
+            }
+
             if (!_storyCache.ContainsKey(id))
             {
                 try

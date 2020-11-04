@@ -25,55 +25,67 @@ namespace SCEnterpriseStoryTags.Services
 
         public bool UpdateStoriesPreflight(EnterpriseSolution solution, out StoryLite[] teamStories)
         {
-            solution.Status = string.Empty;
-            _storyRepository.Reset();
-
-            bool success;
-            var isTeamAdmin = _storyRepository.IsTeamAdmin(solution);
-            teamStories = _storyRepository.LoadTeamStories(solution);
-
-            if (teamStories == null)
+            try
             {
-                solution.AppendToStatus(!solution.IsDirectory
-                    ? "Oops... Looks like your team does not exist"
-                    : "Oops... Looks like your directory does not exist");
+                solution.Status = string.Empty;
+                _storyRepository.Reset();
 
+                bool success;
+                var isTeamAdmin = _storyRepository.IsTeamAdmin(solution);
+                teamStories = _storyRepository.LoadTeamStories(solution);
+
+                if (teamStories == null)
+                {
+                    solution.AppendToStatus(!solution.IsDirectory
+                        ? "Oops... Looks like your team does not exist"
+                        : "Oops... Looks like your directory does not exist");
+
+                    return false;
+                }
+
+                if (isTeamAdmin)
+                {
+                    success = true;
+                }
+                else
+                {
+                    solution.AppendToStatus("Warning: team admin permissions unavailable");
+
+                    var storiesAdmin = true;
+                    foreach (var s in teamStories)
+                    {
+                        var storyCacheItem = _storyRepository.GetStory(solution, s.Id);
+
+                        if (storyCacheItem.Story == null)
+                        {
+                            solution.AppendToStatus($"Error: Cannot load story '{s.Name}'");
+                            storiesAdmin = false;
+                            break;
+                        }
+
+                        storiesAdmin &= storyCacheItem.IsAdmin;
+
+                        if (!storyCacheItem.IsAdmin)
+                        {
+                            solution.AppendToStatus(
+                                $"Error: Admin permissions unavailable for '{storyCacheItem.Story.Name}'. Please contact story owner '{storyCacheItem.Story.StoryAsRoadmap.Owner.Username}'");
+                        }
+                    }
+
+                    success = storiesAdmin;
+                }
+
+                return success;
+            }
+            catch (Exception ex)
+            {
+                solution.AppendToStatus("There was an error.");
+                solution.AppendToStatus($"'{ex.Message}'.");
+                solution.AppendToStatus($"'{ex.StackTrace}'.");
+
+                teamStories = null;
                 return false;
             }
-
-            if (isTeamAdmin)
-            {
-                success = true;
-            }
-            else
-            {
-                solution.AppendToStatus("Warning: team admin permissions unavailable");
-
-                var storiesAdmin = true;
-                foreach (var s in teamStories)
-                {
-                    var storyCacheItem = _storyRepository.GetStory(solution, s.Id);
-
-                    if (storyCacheItem.Story == null)
-                    {
-                        solution.AppendToStatus($"Error: Cannot load story '{s.Name}'");
-                        storiesAdmin = false;
-                        break;
-                    }
-
-                    storiesAdmin &= storyCacheItem.IsAdmin;
-
-                    if (!storyCacheItem.IsAdmin)
-                    {
-                        solution.AppendToStatus(
-                            $"Error: Admin permissions unavailable for '{storyCacheItem.Story.Name}'. Please contact story owner '{storyCacheItem.Story.StoryAsRoadmap.Owner.Username}'");
-                    }
-                }
-                
-                success = storiesAdmin;
-            }
-
-            return success;
         }
 
         public async Task UpdateStories(EnterpriseSolution solution, StoryLite[] teamStories)

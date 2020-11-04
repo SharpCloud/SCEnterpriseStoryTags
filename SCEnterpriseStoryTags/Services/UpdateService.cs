@@ -104,16 +104,9 @@ namespace SCEnterpriseStoryTags.Services
                 solution.AppendToStatus("Updating stories...");
                 if (solution.AllowOwnershipTransfer)
                 {
-                    solution.AppendToStatus("Acquiring admin permissions on all stories...");
                     var success = await GetAdminPermissions(solution, teamStories);
-
-                    if (success)
+                    if (!success)
                     {
-                        solution.AppendToStatus("Acquired admin permissions on all stories");
-                    }
-                    else
-                    {
-                        solution.AppendToStatus("Failed to acquire admin permissions on all stories. Aborting");
                         return;
                     }
                 }
@@ -240,7 +233,9 @@ namespace SCEnterpriseStoryTags.Services
             EnterpriseSolution solution,
             StoryLite[] teamStories)
         {
+            solution.AppendToStatus("Acquiring admin permissions on all stories...");
             var processSuccess = true;
+            
             foreach (var s in teamStories)
             {
                 var cacheEntry = _storyRepository.GetStory(solution, s.Id);
@@ -274,7 +269,11 @@ namespace SCEnterpriseStoryTags.Services
 
                 }
             }
-            
+
+            solution.AppendToStatus(processSuccess
+                ? "Acquired admin permissions on all stories"
+                : "Failed to acquire admin permissions on all stories. Aborting");
+
             return processSuccess;
         }
 

@@ -28,6 +28,7 @@ namespace SCEnterpriseStoryTags.Services
             try
             {
                 solution.Status = string.Empty;
+                solution.AppendToStatus("Checking for admin permissions...");
                 _storyRepository.Reset();
 
                 bool success;
@@ -46,6 +47,13 @@ namespace SCEnterpriseStoryTags.Services
                 if (isTeamAdmin)
                 {
                     success = true;
+                    solution.AppendToStatus("Team admin permissions available");
+
+                    if (!solution.AllowOwnershipTransfer)
+                    {
+                        solution.AppendToStatus(
+                            "Warning: stories will not be updated where story admin permissions are unavailable. Consider enabling the option to automatically become a story admin");
+                    }
                 }
                 else
                 {
@@ -75,6 +83,7 @@ namespace SCEnterpriseStoryTags.Services
                     success = storiesAdmin;
                 }
 
+                solution.AppendToStatus("Admin permissions checks complete");
                 return success;
             }
             catch (Exception ex)
@@ -92,9 +101,10 @@ namespace SCEnterpriseStoryTags.Services
         {
             try
             {
+                solution.AppendToStatus("Updating stories...");
                 if (solution.AllowOwnershipTransfer)
                 {
-                    solution.AppendToStatus("Acquiring admin permissions on all stories");
+                    solution.AppendToStatus("Acquiring admin permissions on all stories...");
                     var success = await GetAdminPermissions(solution, teamStories);
 
                     if (success)
@@ -111,6 +121,7 @@ namespace SCEnterpriseStoryTags.Services
                 var templateStoryCacheItem =
                     _storyRepository.GetStory(solution, solution.TemplateId, "Reading template...");
 
+                solution.AppendToStatus("Adding tags to template story...");
                 var tags = CreateTagsInTemplateStory(solution, teamStories, templateStoryCacheItem.Story);
                 SaveStories(solution, true);
 

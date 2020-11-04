@@ -274,6 +274,7 @@
                              IsReadOnly="True"
                              Margin="10,0,10,10"
                              Text="{Binding SelectedSolution.Status}"
+                             TextWrapping="WrapWithOverflow"
                              VerticalScrollBarVisibility="Auto">
                     </TextBox>
                 </Grid>

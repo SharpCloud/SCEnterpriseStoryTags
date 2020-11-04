@@ -18,6 +18,9 @@ namespace SCEnterpriseStoryTags.Tests.Services
         private const string TemplateId = "07646506-e549-423b-914e-45f32b7b5316";
         private const string ChildId = "82075c99-399d-48a4-a8df-e4f413893435";
 
+        private const string StoriesAdminWarning =
+            "Warning: stories will not be updated where story admin permissions are unavailable. Consider enabling the option to automatically become a story admin";
+
         private static (Story, StoryLite, StoryRepositoryCacheEntry) CreateStory(string id, bool isAdmin)
         {
             var story = new Story(new Roadmap(new Guid(id)), null);
@@ -279,6 +282,9 @@ namespace SCEnterpriseStoryTags.Tests.Services
             // Assert
 
             Assert.IsTrue(result);
+
+            var hasMessage = solution.Status.Contains("Team admin permissions available");
+            Assert.IsTrue(hasMessage);
         }
 
         [Test]
@@ -334,6 +340,48 @@ namespace SCEnterpriseStoryTags.Tests.Services
 
             var hasError = solution.Status.Contains("Error: Cannot load story 'Template Story'");
             Assert.IsTrue(hasError);
+        }
+
+        [Test]
+        public void WarningIsNotLoggedIfTeamAdminAndAllowingOwnershipTransfer()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution
+            {
+                AllowOwnershipTransfer = true
+            };
+            
+            var repository = Mock.Of<IStoryRepository>(r => r.IsTeamAdmin(solution));
+            var service = new UpdateService(0, repository);
+
+            // Act
+
+            service.UpdateStoriesPreflight(solution, out _);
+
+            // Assert
+
+            var hasWarning = solution.Status.Contains(StoriesAdminWarning);
+            Assert.IsFalse(hasWarning);
+        }
+
+        [Test]
+        public void WarningIsLoggedIfTeamAdminAndNotAllowingOwnershipTransfer()
+        {
+            // Arrange
+
+            var solution = new EnterpriseSolution();
+            var repository = Mock.Of<IStoryRepository>(r => r.IsTeamAdmin(solution));
+            var service = new UpdateService(0, repository);
+
+            // Act
+
+            service.UpdateStoriesPreflight(solution, out _);
+
+            // Assert
+
+            var hasWarning = solution.Status.Contains(StoriesAdminWarning);
+            Assert.IsTrue(hasWarning);
         }
 
         [Test]

@@ -15,6 +15,7 @@
         UseLayoutRounding="True"
         Width="1040">
     <Window.Resources>
+        <converters:SiteUrlValidationConverter x:Key="SiteUrlValidationConverter" />
         <converters:UrlToStoryIdConverter x:Key="UrlToStoryIdConverter" />
     </Window.Resources>
 
@@ -144,7 +145,7 @@
                         </StackPanel.Resources>
 
                         <Label Content="Site URL:" />
-                        <TextBox x:Name="Url" Text="{Binding SelectedSolution.Url}" />
+                        <TextBox x:Name="Url" Text="{Binding SelectedSolution.Url, Converter={StaticResource SiteUrlValidationConverter}}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
                         <Button Command="{Binding CommandsViewModel.SetSolutionUrl, Source={StaticResource ViewModelLocator}}"
                                 CommandParameter="https://eu.sharpcloud.com"

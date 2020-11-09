@@ -127,6 +127,7 @@
     </ApplicationDefinition>
     <Compile Include="Commands\ActionCommand.cs" />
     <Compile Include="Commands\GoToUrl.cs" />
+    <Compile Include="Converters\SiteUrlValidationConverter.cs" />
     <Compile Include="Converters\UrlToStoryIdConverter.cs" />
     <Compile Include="Interfaces\IActionCommand.cs" />
     <Compile Include="Interfaces\ICommandsViewModel.cs" />

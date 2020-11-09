@@ -75,6 +75,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Converters\SiteUrlValidationConverterTests.cs" />
     <Compile Include="Services\PasswordServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\UpdateServiceTests.cs" />

@@ -148,17 +148,17 @@
                         <TextBox x:Name="Url" Text="{Binding SelectedSolution.Url, Converter={StaticResource SiteUrlValidationConverter}}" />
                         <Image Height="20" Margin="10,0" Source="Images/Information.png" ToolTip="The site where you connect to SharpCloud" />
                         <Button Command="{Binding CommandsViewModel.SetSolutionUrl, Source={StaticResource ViewModelLocator}}"
-                                CommandParameter="https://eu.sharpcloud.com"
+                                CommandParameter="https://eu.sharpcloud.com/"
                                 ToolTip="https://eu.sharpcloud.com">
                             <Image Source="Images/Flags/EU_40x26.png" Style="{StaticResource Flag}" />
                         </Button>
                         <Button Command="{Binding CommandsViewModel.SetSolutionUrl, Source={StaticResource ViewModelLocator}}"
-                                CommandParameter="https://uk.sharpcloud.com"
+                                CommandParameter="https://uk.sharpcloud.com/"
                                 ToolTip="https://uk.sharpcloud.com">
                             <Image Source="Images/Flags/UK_40x26.png" Style="{StaticResource Flag}" />
                         </Button>
                         <Button Command="{Binding CommandsViewModel.SetSolutionUrl, Source={StaticResource ViewModelLocator}}"
-                                CommandParameter="https://my.sharpcloud.com"
+                                CommandParameter="https://my.sharpcloud.com/"
                                 ToolTip="https://my.sharpcloud.com">
                             <Image Source="Images/Flags/US_40x26.png" Style="{StaticResource Flag}" />
                         </Button>
